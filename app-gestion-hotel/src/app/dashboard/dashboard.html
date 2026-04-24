@@ -1,0 +1,74 @@
+<div class="app-layout">
+
+  <!-- ── SIDEBAR ── -->
+  <app-sidebar
+    [activeFilter]="currentFilter()"
+    (filterChange)="currentFilter.set($event)"
+  />
+
+  <!-- ── CONTENU PRINCIPAL ── -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">{{ pageTitle }}</h1>
+        <p class="page-sub">
+          {{ filteredCount }} chambre{{ filteredCount > 1 ? 's' : '' }} · Étages 1 à 3
+        </p>
+      </div>
+
+      <div class="filters">
+        @for (opt of filterOptions; track opt.value) {
+          <button
+            class="filter-btn"
+            [class.active]="currentFilter() === opt.value"
+            (click)="currentFilter.set(opt.value)"
+          >
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- GRILLE DES CHAMBRES -->
+    <div class="content">
+
+      @if (filteredCount === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">🏨</div>
+          <p>Aucune chambre dans cette catégorie</p>
+        </div>
+      } @else {
+        @for (floor of floors(); track floor) {
+          <div class="floor-label">Étage {{ floor }}</div>
+          <div class="rooms-grid">
+            @for (room of roomsByFloor(floor); track room.id) {
+              <app-roomcard
+                [room]="room"
+                (cardClick)="openModal($event)"
+              />
+            }
+          </div>
+        }
+      }
+
+    </div>
+  </main>
+</div>
+
+<!-- ── MODAL ── -->
+@if (selectedRoom()) {
+  <app-roommodal
+    [room]="selectedRoom()!"
+    (close)="closeModal()"
+    (actionDone)="onActionDone($event)"
+  />
+}
+
+<!-- ── TOASTS ── -->
+<div class="toast-container">
+  @for (t of toasts(); track t.id) {
+    <div class="toast" [ngClass]="'toast-' + t.color">{{ t.message }}</div>
+  }
+</div>

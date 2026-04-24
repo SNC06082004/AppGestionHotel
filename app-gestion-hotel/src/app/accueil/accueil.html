@@ -1,0 +1,163 @@
+<!-- accueil.component.html -->
+<div class="accueil-wrapper">
+
+  <!-- ───── HERO ───── -->
+  <div class="hero">
+    <div class="hero-left">
+      <span class="badge-promo">Offres prêts-au-départ — jusqu'à -35 %</span>
+      <h1>Bienvenue au Luxora Hotel</h1>
+      <p>Votre séjour d'exception commence ici. Choisissez votre chambre et réservez en quelques clics.</p>
+
+      <!-- Barre de recherche -->
+      <div class="search-bar">
+        <input type="date" [(ngModel)]="searchForm.dateArrivee" />
+        <input type="date" [(ngModel)]="searchForm.dateDepart" />
+
+        <!-- Déclencheur du sélecteur voyageurs -->
+        <div class="voyageurs-trigger" (click)="toggleVoyageursPanel()">
+          <span class="trigger-icon">👤</span>
+          <span class="trigger-text">{{ voyageursSummary }}</span>
+          <span class="trigger-arrow" [class.open]="showVoyageursPanel">▾</span>
+        </div>
+
+        <button class="btn-search" (click)="onSearch()">Rechercher</button>
+      </div>
+
+      <!-- ── Panel voyageurs ── -->
+      <div class="voyageurs-panel" *ngIf="showVoyageursPanel">
+
+        <!-- Adultes -->
+        <div class="counter-row">
+          <span class="counter-label">Adultes</span>
+          <div class="counter-controls">
+            <button class="counter-btn" (click)="decrement('adultes')" [disabled]="searchForm.adultes <= 1">−</button>
+            <span class="counter-val">{{ searchForm.adultes }}</span>
+            <button class="counter-btn" (click)="increment('adultes')" [disabled]="searchForm.adultes >= 30">+</button>
+          </div>
+        </div>
+
+        <!-- Enfants -->
+        <div class="counter-row">
+          <span class="counter-label">Enfants</span>
+          <div class="counter-controls">
+            <button class="counter-btn" (click)="decrement('enfants')" [disabled]="searchForm.enfants <= 0">−</button>
+            <span class="counter-val">{{ searchForm.enfants }}</span>
+            <button class="counter-btn" (click)="increment('enfants')" [disabled]="searchForm.enfants >= 10">+</button>
+          </div>
+        </div>
+
+        <!-- Sélects âge enfants dynamiques -->
+        <div class="ages-enfants" *ngIf="searchForm.enfants > 0">
+          <div class="ages-grid">
+            <select
+              *ngFor="let age of searchForm.agesEnfants; let i = index"
+              [(ngModel)]="searchForm.agesEnfants[i]"
+              [class.invalid]="age === null"
+            >
+              <option [ngValue]="null" disabled>Âge requis</option>
+              <option *ngFor="let a of agesDisponibles" [ngValue]="a">
+                {{ a === 0 ? "Moins d'1 an" : a + (a === 1 ? ' an' : ' ans') }}
+              </option>
+            </select>
+          </div>
+          <p class="ages-note">
+            Pour afficher les bons tarifs, nous avons besoin de connaître l'âge
+            qu'auront vos enfants à la fin du séjour.
+          </p>
+        </div>
+
+        <!-- Chambres -->
+        <div class="counter-row">
+          <span class="counter-label">Chambres</span>
+          <div class="counter-controls">
+            <button class="counter-btn" (click)="decrement('chambresNb')" [disabled]="searchForm.chambresNb <= 1">−</button>
+            <span class="counter-val">{{ searchForm.chambresNb }}</span>
+            <button class="counter-btn" (click)="increment('chambresNb')" [disabled]="searchForm.chambresNb >= 30">+</button>
+          </div>
+        </div>
+
+        <!-- Séparateur -->
+        <div class="panel-divider"></div>
+
+        <!-- Animal de compagnie -->
+        <div class="animal-row">
+          <span class="counter-label">Vous voyagez avec votre animal ?</span>
+          <div
+            class="toggle"
+            [class.active]="searchForm.avecAnimal"
+            (click)="searchForm.avecAnimal = !searchForm.avecAnimal"
+          >
+            <div class="toggle-thumb"></div>
+          </div>
+        </div>
+        <p class="animal-note">
+          Les animaux d'assistance ne sont pas considérés comme des animaux de compagnie.
+        </p>
+
+        <!-- Bouton Terminer -->
+        <button class="btn-terminer" (click)="toggleVoyageursPanel()">Terminer</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ───── MODULES DE NAVIGATION ───── -->
+  <div class="nav-modules">
+    <div class="nav-card" *ngFor="let module of modules" (click)="navigateTo(module.route)">
+      <span class="nav-icon">{{ module.icon }}</span>
+      <span class="nav-label">{{ module.label }}</span>
+    </div>
+  </div>
+
+  <!-- ───── STATISTIQUES ───── -->
+  <div class="stats-row">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-label">{{ stat.label }}</div>
+      <div class="stat-val">{{ stat.value }}</div>
+    </div>
+  </div>
+
+  <!-- ───── BANDEAU PROMO ───── -->
+  <div class="promo-band">
+    <div>
+      <strong>Offres prêts-au-départ &nbsp;—&nbsp; -25 % ou plus</strong>
+      <span>Réservez maintenant pour un départ dans les 48h et profitez de nos meilleurs prix.</span>
+    </div>
+    <button class="btn-promo" (click)="voirOffres()">Voir toutes les offres</button>
+  </div>
+
+  <!-- ───── CATALOGUE CHAMBRES ───── -->
+  <div class="section-title">Notre catalogue de suites &amp; chambres</div>
+  <div class="section-sub">Sélectionnez une chambre pour consulter les disponibilités et tarifs.</div>
+
+  <div class="rooms-grid">
+    <div class="room-card" *ngFor="let room of chambres">
+      <div class="room-img" [ngClass]="room.colorClass">
+        <span class="room-emoji">{{ room.emoji }}</span>
+      </div>
+      <div class="room-body">
+        <div class="room-name">{{ room.nom }}</div>
+        <div class="amenities">
+          <span class="tag" *ngFor="let tag of room.tags">{{ tag }}</span>
+        </div>
+        <div class="room-desc">{{ room.description }}</div>
+        <div class="room-footer">
+          <div class="prices">
+            <div class="price-old">{{ room.prixOriginal | number }} CFA</div>
+            <div class="price-new">
+              {{ room.prixPromo | number }} CFA
+              <span class="discount-badge">{{ room.remise }}</span>
+            </div>
+          </div>
+          <button class="room-btn" (click)="reserverChambre(room)">Réserver</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───── FOOTER ───── -->
+  <div class="footer-note">
+    Luxora Hotel &nbsp;·&nbsp; Tarifs par nuit, toutes taxes incluses &nbsp;·&nbsp; Offres sous réserve de disponibilité
+  </div>
+
+</div>

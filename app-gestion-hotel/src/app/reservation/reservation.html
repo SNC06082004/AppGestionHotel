@@ -1,0 +1,172 @@
+<div class="shell">
+
+  <div class="shell-header">
+    <span class="shell-eyebrow"><span class="dot"></span> Disponibilité en temps réel</span>
+    <h1 class="shell-title">Réservez votre chambre</h1>
+    <p class="shell-sub">Dates, voyageurs, préférences — tout en quelques secondes.</p>
+  </div>
+
+  <div class="card">
+
+    <!-- ── Dates ── -->
+    <p class="section-label">Période de séjour</p>
+    <div class="dates-grid">
+      <div class="date-field">
+        <div class="field-label">Arrivée</div>
+        <input type="date" [(ngModel)]="searchForm.dateArrivee" (ngModelChange)="recalc()" />
+      </div>
+      <div class="date-field">
+        <div class="field-label">Départ</div>
+        <input type="date" [(ngModel)]="searchForm.dateDepart" (ngModelChange)="recalc()" />
+      </div>
+    </div>
+
+    <div class="night-badge"><span>{{ nightLabel }}</span></div>
+
+    <!-- ── Voyageurs ── -->
+    <p class="section-label">Voyageurs &amp; chambres</p>
+
+    <button class="voyageurs-btn" type="button" (click)="toggleVoyageursPanel()">
+      <div class="voy-icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3C3489" stroke-width="1.5">
+          <circle cx="8" cy="5" r="3"/>
+          <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5"/>
+        </svg>
+      </div>
+      <div class="voy-text">
+        <div class="field-label">Composition</div>
+        <div class="voy-val">{{ voyageursSummary }}</div>
+      </div>
+      <span class="voy-arrow" [class.open]="showVoyageursPanel">▾</span>
+    </button>
+
+    <div class="voyageurs-panel" *ngIf="showVoyageursPanel">
+
+      <div class="counter-row">
+        <div class="counter-info">
+          <div class="c-title">Adultes</div><div class="c-sub">18 ans et plus</div>
+        </div>
+        <div class="counter-controls">
+          <button class="cbtn" type="button" (click)="decrement('adultes')" [disabled]="searchForm.adultes <= 1">−</button>
+          <span class="cval">{{ searchForm.adultes }}</span>
+          <button class="cbtn" type="button" (click)="increment('adultes')" [disabled]="searchForm.adultes >= 30">+</button>
+        </div>
+      </div>
+
+      <div class="counter-row">
+        <div class="counter-info">
+          <div class="c-title">Enfants</div><div class="c-sub">0 – 17 ans</div>
+        </div>
+        <div class="counter-controls">
+          <button class="cbtn" type="button" (click)="decrement('enfants')" [disabled]="searchForm.enfants <= 0">−</button>
+          <span class="cval">{{ searchForm.enfants }}</span>
+          <button class="cbtn" type="button" (click)="increment('enfants')" [disabled]="searchForm.enfants >= 10">+</button>
+        </div>
+      </div>
+
+      <div class="ages-enfants" *ngIf="searchForm.enfants > 0">
+        <div class="ages-grid">
+          <select
+            *ngFor="let age of searchForm.agesEnfants; let i = index"
+            [(ngModel)]="searchForm.agesEnfants[i]"
+            [class.invalid]="age === null"
+          >
+            <option [ngValue]="null" disabled>Âge requis</option>
+            <option *ngFor="let a of agesDisponibles" [ngValue]="a">
+              {{ a === 0 ? "Moins d'1 an" : a + (a === 1 ? ' an' : ' ans') }}
+            </option>
+          </select>
+        </div>
+        <p class="ages-note">L'âge de l'enfant doit correspondre à la fin du séjour.</p>
+      </div>
+
+      <div class="counter-row">
+        <div class="counter-info">
+          <div class="c-title">Chambres</div><div class="c-sub">1 chambre par groupe recommandé</div>
+        </div>
+        <div class="counter-controls">
+          <button class="cbtn" type="button" (click)="decrement('chambresNb')" [disabled]="searchForm.chambresNb <= 1">−</button>
+          <span class="cval">{{ searchForm.chambresNb }}</span>
+          <button class="cbtn" type="button" (click)="increment('chambresNb')" [disabled]="searchForm.chambresNb >= 30">+</button>
+        </div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="animal-row">
+        <div class="counter-info">
+          <div class="c-title">Animal de compagnie</div>
+          <div class="c-sub">Hors animaux d'assistance</div>
+        </div>
+        <div class="toggle" [class.on]="searchForm.avecAnimal"
+             (click)="searchForm.avecAnimal = !searchForm.avecAnimal">
+          <div class="toggle-thumb"></div>
+        </div>
+      </div>
+
+      <button class="btn-terminer" type="button" (click)="toggleVoyageursPanel()">Terminer</button>
+    </div>
+
+    <!-- ── Résumé ── -->
+    <div class="summary-strip">
+      <div class="sum-item"><div class="s-label">Adultes</div><div class="s-val">{{ searchForm.adultes }}</div></div>
+      <div class="sum-item"><div class="s-label">Enfants</div><div class="s-val">{{ searchForm.enfants }}</div></div>
+      <div class="sum-item"><div class="s-label">Chambres</div><div class="s-val">{{ searchForm.chambresNb }}</div></div>
+    </div>
+
+    <!-- ── Estimation du coût ── -->
+    <p class="section-label">Estimation du coût</p>
+    <div class="cost-block">
+      <div class="cost-top">
+        <span class="cost-title">Détail tarifaire</span>
+        <span class="cost-status">{{ prixParNuit | number:'1.0-0' }} FCFA / nuit / chambre</span>
+      </div>
+
+      <ng-container *ngIf="nights > 0; else costEmpty">
+        <div class="cost-rows">
+          <div class="cost-row">
+            <span class="cr-label">Prix par nuit</span>
+            <span class="cr-val">{{ prixParNuit | number:'1.0-0' }} FCFA</span>
+          </div>
+          <div class="cost-row">
+            <span class="cr-label">Nombre de nuits</span>
+            <span class="cr-val">{{ nights }}</span>
+          </div>
+          <div class="cost-row">
+            <span class="cr-label">Nombre de chambres</span>
+            <span class="cr-val">{{ searchForm.chambresNb }}</span>
+          </div>
+        </div>
+        <div class="cost-total-line">
+          <span class="cost-total-label">Total estimé</span>
+          <span>
+            <span class="cost-total-amount">{{ totalCost | number:'1.0-0' }}</span>
+            <span class="cost-total-currency">FCFA</span>
+          </span>
+        </div>
+      </ng-container>
+
+      <ng-template #costEmpty>
+        <p class="cost-empty">Sélectionnez vos dates pour estimer le coût.</p>
+      </ng-template>
+    </div>
+
+    <!-- ── Bouton valider ── -->
+    <button class="btn-valider" type="button" (click)="onValider()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.5">
+        <path d="M3 8l4 4 6-7"/>
+      </svg>
+      Valider la réservation
+    </button>
+
+  </div>
+  <app-payement
+  [isVisible]="showPaymentModal"
+  [total]="totalCost"
+  [nights]="nights"
+  [chambres]="searchForm.chambresNb"
+  [adultes]="searchForm.adultes"
+  (closed)="showPaymentModal = false"
+  (paid)="onPaymentDone($event)">
+</app-payement>
+</div>

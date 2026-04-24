@@ -1,0 +1,107 @@
+<!-- inscription/inscription.html -->
+
+<div class="inscription-wrapper">
+  <div class="inscription-card">
+
+    <div class="hotel-badge">
+      <div class="hotel-icon">🏨</div>
+      <div>
+        <p class="hotel-name">Gestion Hôtel</p>
+        <p class="hotel-sub">Espace administration</p>
+      </div>
+    </div>
+
+    <h2>Créer un compte</h2>
+    <p class="subtitle">Remplissez les informations pour vous inscrire</p>
+
+    <!-- Message d'erreur -->
+    <div class="alert alert-error" *ngIf="messageErreur">
+      {{ messageErreur }}
+    </div>
+
+    <!-- Message de succès -->
+    <div class="alert alert-success" *ngIf="messageSucces">
+      {{ messageSucces }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+
+      <!-- Nom & Prénom -->
+      <div class="row">
+        <div class="field">
+          <label for="nom">Nom</label>
+          <input
+            id="nom"
+            type="text"
+            [(ngModel)]="nom"
+            name="nom"
+            placeholder="Votre nom"
+            required
+          />
+        </div>
+        <div class="field">
+          <label for="prenom">Prénom</label>
+          <input
+            id="prenom"
+            type="text"
+            [(ngModel)]="prenom"
+            name="prenom"
+            placeholder="Votre prénom"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="exemple@hotel.com"
+          required
+        />
+      </div>
+
+      <!-- Téléphone -->
+      <div class="field">
+        <label for="telephone">Téléphone</label>
+        <input
+          id="telephone"
+          type="tel"
+          [(ngModel)]="telephone"
+          name="telephone"
+          placeholder="+226 XX XX XX XX"
+          required
+        />
+      </div>
+
+      <!-- Mot de passe -->
+      <div class="field">
+        <label for="motDePasse">Mot de passe</label>
+        <input
+          id="motDePasse"
+          type="password"
+          [(ngModel)]="motDePasse"
+          name="motDePasse"
+          placeholder="Choisissez un mot de passe"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-inscription" [disabled]="isLoading">
+        <span *ngIf="!isLoading">S'inscrire</span>
+        <span *ngIf="isLoading">Inscription en cours...</span>
+      </button>
+
+    </form>
+
+    <p class="login-link">
+      Déjà un compte ?
+      <a routerLink="/connexion">Se connecter</a>
+    </p>
+
+  </div>
+</div>

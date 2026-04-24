@@ -1,0 +1,153 @@
+<div class="flex h-screen bg-zinc-950 text-white overflow-hidden">
+
+  <!-- Sidebar élégante -->
+  <div class="w-72 bg-zinc-900 border-r border-zinc-800 flex flex-col">
+    
+    <!-- Header Sidebar -->
+    <div class="p-6 border-b border-zinc-800">
+      <div class="flex items-center gap-4">
+        <div class="w-11 h-11 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+          🏨
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">{{ hotelName }}</h1>
+          <p class="text-zinc-400 text-sm">Gestion Hôtelière • Luxe</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-4 py-6">
+      <ul class="space-y-2">
+        <li *ngFor="let item of menuItems" 
+            [routerLink]="item.route"
+            routerLinkActive="active"
+            class="group flex items-center gap-4 px-5 py-4 rounded-2xl text-zinc-300 hover:text-white hover:bg-zinc-800/70 transition-all duration-200 cursor-pointer">
+          <span class="text-2xl transition-transform group-hover:scale-110">{{ item.icon }}</span>
+          <span class="font-medium">{{ item.name }}</span>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- User info bas de sidebar -->
+    <div class="p-5 border-t border-zinc-800">
+      <div class="flex items-center gap-4 bg-zinc-800/50 rounded-2xl p-4">
+        <div class="w-12 h-12 bg-zinc-700 rounded-2xl flex items-center justify-center text-2xl">👨‍💼</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold truncate">{{ username }}</p>
+          <p class="text-zinc-400 text-sm">{{ role }}</p>
+        </div>
+        <button class="text-zinc-400 hover:text-white transition-colors">⚙️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col">
+
+    <!-- Top Header -->
+    <header class="h-20 bg-zinc-900 border-b border-zinc-800 px-10 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <h2 class="text-3xl font-semibold tracking-tight">Tableau de bord</h2>
+        <p class="text-zinc-400">{{ currentDate }}</p>
+      </div>
+
+      <div class="flex items-center gap-8">
+        <!-- Recherche -->
+        <div class="relative w-96">
+          <input 
+            type="text" 
+            placeholder="Rechercher réservation, client ou chambre..."
+            class="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-3xl py-3.5 px-6 pl-14 text-sm focus:outline-none transition-all">
+          <span class="absolute left-6 top-4 text-zinc-400">🔎</span>
+        </div>
+
+        <!-- Notifications -->
+        <button class="relative p-4 hover:bg-zinc-800 rounded-3xl transition-colors">
+          🛎️
+          <span class="absolute top-3 right-3 w-5 h-5 bg-rose-500 text-[10px] font-medium rounded-full flex items-center justify-center">4</span>
+        </button>
+
+        <!-- Profil -->
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <p class="font-medium">{{ username }}</p>
+            <p class="text-emerald-400 text-xs">● En ligne</p>
+          </div>
+          <div class="w-11 h-11 bg-gradient-to-br from-violet-400 to-fuchsia-400 rounded-2xl flex items-center justify-center text-3xl ring-2 ring-zinc-700">
+            👨‍💼
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="flex-1 p-10 overflow-auto bg-zinc-950">
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div *ngFor="let stat of stats" 
+             class="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 hover:border-violet-500/30 group transition-all duration-300">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-zinc-400 text-sm">{{ stat.label }}</p>
+              <p class="text-5xl font-semibold mt-4 tracking-tighter">
+                {{ stat.value }}<span class="text-3xl text-zinc-400" *ngIf="stat.unit">{{ stat.unit }}</span>
+              </p>
+              <p *ngIf="stat.total" class="text-zinc-500 text-sm mt-1">
+                sur {{ stat.total }} • {{ stat.percent }}
+              </p>
+            </div>
+            <div class="w-14 h-14 bg-gradient-to-br {{ stat.color }} rounded-2xl flex items-center justify-center text-4xl shadow-xl shadow-black/40 group-hover:scale-110 transition-transform">
+              {{ stat.icon }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Welcome Banner -->
+      <div class="mt-10 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-purple-600 rounded-3xl p-10 flex items-center justify-between">
+        <div>
+          <h3 class="text-3xl font-semibold">Bonjour Alexandre 👋</h3>
+          <p class="text-violet-100 mt-2 text-lg">Tout est sous contrôle aujourd’hui. 14 arrivées prévues.</p>
+        </div>
+        <div class="text-7xl">🏨</div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mt-12">
+        <h3 class="text-xl font-semibold text-zinc-300 mb-6">Actions rapides</h3>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <button routerLink="/reservations" 
+                  class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-emerald-500 p-8 rounded-3xl text-left transition-all group">
+            <div class="text-5xl mb-6 group-hover:scale-110 transition-transform">📅</div>
+            <p class="text-lg font-semibold">Nouvelle réservation</p>
+            <p class="text-zinc-400 text-sm mt-1">Enregistrer une arrivée</p>
+          </button>
+
+          <button routerLink="/rooms" 
+                  class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-sky-500 p-8 rounded-3xl text-left transition-all group">
+            <div class="text-5xl mb-6 group-hover:scale-110 transition-transform">🛏️</div>
+            <p class="text-lg font-semibold">Gestion des chambres</p>
+            <p class="text-zinc-400 text-sm mt-1">Voir disponibilités</p>
+          </button>
+
+          <button routerLink="/clients" 
+                  class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-amber-500 p-8 rounded-3xl text-left transition-all group">
+            <div class="text-5xl mb-6 group-hover:scale-110 transition-transform">👤</div>
+            <p class="text-lg font-semibold">Nouveau client</p>
+            <p class="text-zinc-400 text-sm mt-1">Ajouter un profil</p>
+          </button>
+
+          <button routerLink="/billing" 
+                  class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-rose-500 p-8 rounded-3xl text-left transition-all group">
+            <div class="text-5xl mb-6 group-hover:scale-110 transition-transform">💳</div>
+            <p class="text-lg font-semibold">Facturation</p>
+            <p class="text-zinc-400 text-sm mt-1">Générer une facture</p>
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>

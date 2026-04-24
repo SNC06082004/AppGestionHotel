@@ -1,0 +1,251 @@
+<div class="page">
+
+  <!-- ── Topbar ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo-pill">Luxora</div>
+      <span class="page-title">Gestion des clients</span>
+    </div>
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/>
+      </svg>
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher un client..." />
+    </div>
+  </div>
+
+  <!-- ── Stats ── -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="s-label">Clients total</div>
+      <div class="s-val">{{ totalClients }}</div>
+      <div class="s-sub success">+3 ce mois</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-label">Plaintes ouvertes</div>
+      <div class="s-val">{{ plaintesOuvertes }}</div>
+      <div class="s-sub danger">2 urgentes</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-label">Demandes spéciales</div>
+      <div class="s-val">{{ demandesAttente }}</div>
+      <div class="s-sub warning">en attente</div>
+    </div>
+    <div class="stat-card">
+      <div class="s-label">Cartes fidélité</div>
+      <div class="s-val">{{ totalFidelite }}</div>
+      <div class="s-sub purple">actives</div>
+    </div>
+  </div>
+
+  <!-- ── Onglets ── -->
+  <div class="tabs">
+    <button class="tab" [class.active]="activeTab === 'clients'"   (click)="switchTab('clients')">Clients</button>
+    <button class="tab" [class.active]="activeTab === 'plaintes'"  (click)="switchTab('plaintes')">Plaintes</button>
+    <button class="tab" [class.active]="activeTab === 'speciales'" (click)="switchTab('speciales')">Demandes spéciales</button>
+    <button class="tab" [class.active]="activeTab === 'fidelite'"  (click)="switchTab('fidelite')">Fidélité</button>
+  </div>
+
+  <!-- ══ Onglet Clients ══ -->
+  <div *ngIf="activeTab === 'clients'" class="client-list">
+    <ng-container *ngFor="let client of clientsFiltres">
+
+      <div class="client-row" [class.open]="client.ouvert" (click)="toggleClient(client)">
+        <div class="avatar">{{ client.initiales }}</div>
+        <div class="client-info">
+          <div class="ci-name">{{ client.nom }}</div>
+          <div class="ci-meta">Chambre {{ client.chambre }} · Arrivée {{ client.arrivee }} · Départ {{ client.depart }}</div>
+        </div>
+        <div class="badges">
+          <span *ngFor="let b of getBadgesClient(client)" class="badge" [ngClass]="badgeClass(b)">{{ b }}</span>
+          <span *ngIf="getBadgesClient(client).length === 0" class="badge badge-ok">Aucun incident</span>
+        </div>
+        <span class="chevron" [class.open]="client.ouvert">▾</span>
+      </div>
+
+      <div class="client-detail" *ngIf="client.ouvert">
+        <div class="detail-grid">
+          <div class="detail-item"><div class="d-label">Téléphone</div><div class="d-val">{{ client.telephone }}</div></div>
+          <div class="detail-item"><div class="d-label">Email</div><div class="d-val">{{ client.email }}</div></div>
+          <div class="detail-item"><div class="d-label">Séjours</div><div class="d-val">{{ client.sejours }} séjour{{ client.sejours > 1 ? 's' : '' }}</div></div>
+          <div class="detail-item"><div class="d-label">Points fidélité</div><div class="d-val">{{ getPointsClient(client.id) | number:'1.0-0' }} pts</div></div>
+        </div>
+        <div class="detail-actions">
+          <button class="btn-action" type="button" (click)="switchTab('plaintes')">Ajouter plainte</button>
+          <button class="btn-action" type="button" (click)="switchTab('speciales')">Demande spéciale</button>
+          <button class="btn-action" type="button" (click)="switchTab('fidelite')">Voir fidélité</button>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+
+  <!-- ══ Onglet Plaintes ══ -->
+  <div *ngIf="activeTab === 'plaintes'">
+    <div class="form-card">
+      <h3>Nouvelle plainte</h3>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Client</label>
+          <select [(ngModel)]="nouvellePlainte.clientNom">
+            <option value="" disabled>Sélectionner</option>
+            <option *ngFor="let n of nomsClients()">{{ n }}</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Priorité</label>
+          <select [(ngModel)]="nouvellePlainte.priorite">
+            <option value="normale">Normale</option>
+            <option value="urgente">Urgente</option>
+            <option value="basse">Basse</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group full">
+          <label>Objet</label>
+          <input type="text" [(ngModel)]="nouvellePlainte.objet" placeholder="Ex : Climatisation défectueuse" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group full">
+          <label>Description</label>
+          <textarea [(ngModel)]="nouvellePlainte.description" placeholder="Décrivez la plainte..."></textarea>
+        </div>
+      </div>
+      <button class="btn-submit" type="button" (click)="ajouterPlainte()">Enregistrer la plainte</button>
+    </div>
+
+    <div class="plainte-list">
+      <div class="item-row" *ngFor="let p of plaintes">
+        <div class="item-dot" [ngClass]="dotClass(p.statut)"></div>
+        <div class="item-body">
+          <div class="item-title">{{ p.objet }} — {{ p.clientNom }}</div>
+          <div class="item-meta">Chambre {{ p.chambre }} · {{ p.date }} · Priorité : {{ p.priorite }}</div>
+        </div>
+        <span class="item-status" [ngClass]="statutClass(p.statut)">{{ statutLabel(p.statut) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Onglet Demandes spéciales ══ -->
+  <div *ngIf="activeTab === 'speciales'">
+    <div class="form-card">
+      <h3>Nouvelle demande spéciale</h3>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Client</label>
+          <select [(ngModel)]="nouvelleDemande.clientNom">
+            <option value="" disabled>Sélectionner</option>
+            <option *ngFor="let n of nomsClients()">{{ n }}</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Type</label>
+          <select [(ngModel)]="nouvelleDemande.type">
+            <option>Préférence alimentaire</option>
+            <option>Accessibilité</option>
+            <option>Décoration chambre</option>
+            <option>Transport</option>
+            <option>Autre</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group full">
+          <label>Détail</label>
+          <textarea [(ngModel)]="nouvelleDemande.detail" placeholder="Ex : Repas végétarien, lit bébé..."></textarea>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Date souhaitée</label>
+          <input type="date" [(ngModel)]="nouvelleDemande.dateSouhaitee" />
+        </div>
+        <div class="field-group">
+          <label>Statut</label>
+          <select [(ngModel)]="nouvelleDemande.statut">
+            <option value="en_attente">En attente</option>
+            <option value="en_cours">Pris en charge</option>
+            <option value="traite">Traité</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-submit" type="button" (click)="ajouterDemande()">Enregistrer la demande</button>
+    </div>
+
+    <div class="special-list">
+      <div class="item-row" *ngFor="let d of demandes">
+        <div class="item-dot" [ngClass]="dotClass(d.statut)"></div>
+        <div class="item-body">
+          <div class="item-title">{{ d.detail }} — {{ d.clientNom }}</div>
+          <div class="item-meta">Chambre {{ d.chambre }} · {{ d.type }} · {{ d.dateSouhaitee }}</div>
+        </div>
+        <span class="item-status" [ngClass]="statutClass(d.statut)">{{ statutLabel(d.statut) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Onglet Fidélité ══ -->
+  <div *ngIf="activeTab === 'fidelite'">
+    <div class="form-card">
+      <h3>Ajouter des points</h3>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Client</label>
+          <select [(ngModel)]="ajoutPoints.clientNom">
+            <option value="" disabled>Sélectionner</option>
+            <option *ngFor="let c of cartes" [value]="c.nom">{{ c.nom }} — {{ c.points }} pts</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Points à ajouter</label>
+          <input type="number" [(ngModel)]="ajoutPoints.points" min="0" placeholder="Ex : 100" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label>Motif</label>
+          <select [(ngModel)]="ajoutPoints.motif">
+            <option>Séjour complété</option>
+            <option>Parrainage</option>
+            <option>Offre spéciale</option>
+            <option>Correction manuelle</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Date</label>
+          <input type="date" [(ngModel)]="ajoutPoints.date" />
+        </div>
+      </div>
+      <button class="btn-submit" type="button" (click)="attribuerPoints()">Attribuer les points</button>
+    </div>
+
+    <div class="fid-list">
+      <div class="fid-card" *ngFor="let c of cartes">
+        <div class="fid-top">
+          <div class="fid-avatar">{{ c.initiales }}</div>
+          <div>
+            <div class="fid-name">{{ c.nom }}</div>
+            <div class="fid-num">Carte #{{ c.numero }}</div>
+          </div>
+          <span class="fid-tier" [ngClass]="tierClass(c.tier)">{{ c.tier }}</span>
+        </div>
+        <div class="points-bar-wrap">
+          <div class="points-label">
+            <span>{{ c.points | number:'1.0-0' }} pts</span>
+            <span>Prochain palier : {{ c.palierSuivant | number:'1.0-0' }} pts</span>
+          </div>
+          <div class="points-bar">
+            <div class="points-fill" [style.width.%]="progression(c)"></div>
+          </div>
+        </div>
+        <div class="fid-footer">
+          <span>{{ c.sejours }} séjour{{ c.sejours > 1 ? 's' : '' }} · Membre depuis {{ c.membreDepuis }}</span>
+          <span class="pts-restants">{{ c.palierSuivant - c.points | number:'1.0-0' }} pts restants</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,40 @@
+<div class="room-card" [ngClass]="room.status" (click)="onClick()">
+
+  <div class="room-header">
+    <div class="room-number">{{ room.number }}</div>
+    <span class="status-badge" [ngClass]="'badge-' + room.status">
+      {{ statusLabel }}
+    </span>
+  </div>
+
+  <div class="room-type">{{ room.type }}</div>
+
+  <div class="room-info">
+    <span>👥 {{ room.capacity }} pers.</span>
+    <span>💰 {{ room.price }}€/nuit</span>
+  </div>
+
+  <!-- Client actuel -->
+  @if (room.status === 'occupied' && room.guest) {
+    <div class="room-person">
+      <div class="person-name">👤 {{ room.guest.name }}</div>
+      <div class="person-detail">
+        {{ room.guest.checkIn | date:'dd MMM' : '' : 'fr-FR' }}
+        → {{ room.guest.checkOut | date:'dd MMM' : '' : 'fr-FR' }}
+      </div>
+    </div>
+  }
+
+  <!-- Personnel assigné -->
+  @if ((room.status === 'cleaning' || room.status === 'maintenance') && room.staff) {
+    <div class="room-person">
+      <div class="person-name">
+        {{ room.status === 'cleaning' ? '🧹' : '🔧' }} {{ room.staff }}
+      </div>
+      @if (room.notes) {
+        <div class="person-detail">{{ room.notes }}</div>
+      }
+    </div>
+  }
+
+</div>

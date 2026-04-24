@@ -1,0 +1,92 @@
+.room-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.room-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.room-card.available::before   { background: var(--green); }
+.room-card.occupied::before    { background: var(--blue); }
+.room-card.cleaning::before    { background: var(--amber); }
+.room-card.maintenance::before { background: var(--red); }
+
+.room-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: var(--shadow);
+}
+
+/* En-tête */
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.room-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--gold-light);
+  line-height: 1;
+}
+
+/* Badge statut */
+.status-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.badge-available   { background: var(--green-dim); color: var(--green); }
+.badge-occupied    { background: var(--blue-dim);  color: var(--blue); }
+.badge-cleaning    { background: var(--amber-dim); color: var(--amber); }
+.badge-maintenance { background: var(--red-dim);   color: var(--red); }
+
+/* Infos */
+.room-type {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.room-info {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 10px;
+}
+
+/* Personne assignée */
+.room-person {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.person-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.person-detail {
+  color: var(--text-muted);
+  margin-top: 2px;
+}

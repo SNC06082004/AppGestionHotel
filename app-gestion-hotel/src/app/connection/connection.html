@@ -1,0 +1,57 @@
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <div class="hotel-badge">
+      <div class="hotel-icon">
+        <span class="material-icons">hotel</span>
+      </div>
+      <div>
+        <p class="hotel-name">Gestion Hôtel</p>
+        <p class="hotel-sub">Espace administration</p>
+      </div>
+    </div>
+
+    <h2>Connexion</h2>
+    <p class="subtitle">Accédez à votre espace de gestion</p>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="field">
+        <label for="identifiant">Identifiant</label>
+        <input
+          id="identifiant"
+          type="text"
+          [(ngModel)]="identifiant"
+          name="identifiant"
+          placeholder="Votre identifiant"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label for="motDePasse">Mot de passe</label>
+        <input
+          id="motDePasse"
+          type="password"
+          [(ngModel)]="motDePasse"
+          name="motDePasse"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-login">Se connecter</button>
+    </form>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span>ou</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <p class="register-link">
+      Pas encore de compte ?
+      <a routerLink="/inscription">Créer un compte</a>
+    </p>
+
+  </div>
+</div>

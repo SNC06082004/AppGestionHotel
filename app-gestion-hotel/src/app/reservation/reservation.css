@@ -1,0 +1,137 @@
+/* ── Shell violet ── */
+.shell {
+  background: #db63d3;
+  border-radius: 20px;
+  padding: 2.5rem 2rem 2rem;
+  position: relative;
+  overflow: hidden;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.shell::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+}
+.shell::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: -40px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── En-tête ── */
+.shell-header { margin-bottom: 1.5rem; position: relative; z-index: 1; }
+.shell-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 0.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 12px; font-weight: 500; color: #CECBF6;
+  letter-spacing: 0.04em; margin-bottom: 10px;
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: #AFA9EC; }
+.shell-title { font-size: 26px; font-weight: 500; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+.shell-sub { font-size: 14px; color: rgba(255, 255, 255, 0.6); }
+
+/* ── Carte blanche ── */
+.card { background: #fff; border-radius: 16px; padding: 1.5rem; position: relative; z-index: 1; }
+.section-label {
+  font-size: 11px; font-weight: 500; color: #aaa;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px;
+}
+
+/* ── Dates ── */
+.dates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+.date-field {
+  border: 0.5px solid #e0e0e0; border-radius: 10px;
+  padding: 12px 14px; background: #f8f8fc; transition: border-color .15s;
+}
+.date-field:hover { border-color: #7F77DD; }
+.field-label { font-size: 11px; color: #999; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.date-field input[type="date"] {
+  border: none; background: transparent; padding: 0;
+  font-size: 15px; font-weight: 500; color: #1a1a1a; width: 100%; outline: none;
+}
+.night-badge { display: flex; align-items: center; justify-content: center; margin: 0 0 1.25rem; }
+.night-badge span { background: #EEEDFE; color: #3C3489; border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 500; }
+
+/* ── Bouton voyageurs ── */
+.voyageurs-btn {
+  width: 100%; border: 0.5px solid #e0e0e0; border-radius: 10px;
+  padding: 12px 14px; background: #f8f8fc; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 1.25rem; transition: border-color .15s;
+}
+.voyageurs-btn:hover { border-color: #7F77DD; }
+.voy-icon { width: 32px; height: 32px; border-radius: 8px; background: #EEEDFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.voy-text { flex: 1; text-align: left; }
+.voy-val { font-size: 15px; font-weight: 500; color: #1a1a1a; }
+.voy-arrow { color: #999; font-size: 12px; transition: transform .2s; }
+.voy-arrow.open { transform: rotate(180deg); }
+
+/* ── Panel voyageurs ── */
+.voyageurs-panel { background: #f8f8fc; border: 0.5px solid #e8e8f0; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem; }
+.counter-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid #ebebf0; }
+.counter-row:last-of-type { border-bottom: none; }
+.c-title { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+.c-sub { font-size: 12px; color: #bbb; margin-top: 1px; }
+.counter-controls { display: flex; align-items: center; gap: 10px; }
+.cbtn {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 0.5px solid #ddd; background: #fff; cursor: pointer;
+  font-size: 18px; display: flex; align-items: center; justify-content: center;
+  color: #1a1a1a; transition: border-color .15s;
+}
+.cbtn:hover { border-color: #7F77DD; }
+.cbtn:disabled { opacity: 0.3; cursor: default; }
+.cval { font-size: 15px; font-weight: 500; min-width: 22px; text-align: center; color: #1a1a1a; }
+.panel-divider { border: none; border-top: 0.5px solid #ebebf0; margin: 4px 0; }
+.animal-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+.toggle { width: 42px; height: 24px; border-radius: 12px; background: #ddd; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; }
+.toggle.on { background: #7F77DD; }
+.toggle-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: left .2s; }
+.toggle.on .toggle-thumb { left: 20px; }
+.ages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 8px; }
+.ages-grid select { border: 0.5px solid #ddd; border-radius: 8px; padding: 7px 10px; font-size: 13px; background: #fff; color: #1a1a1a; }
+.ages-grid select.invalid { border-color: #E24B4A; }
+.ages-note { font-size: 12px; color: #bbb; margin-top: 8px; line-height: 1.5; }
+.btn-terminer { width: 100%; margin-top: 12px; padding: 9px; border-radius: 8px; border: 0.5px solid #ddd; background: #fff; cursor: pointer; font-size: 13px; font-weight: 500; color: #666; }
+.btn-terminer:hover { background: #f0f0f6; }
+
+/* ── Résumé ── */
+.summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+.sum-item { background: #f8f8fc; border-radius: 10px; padding: 10px 12px; border: 0.5px solid #e8e8f0; }
+.s-label { font-size: 11px; color: #bbb; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+.s-val { font-size: 16px; font-weight: 500; color: #1a1a1a; }
+
+/* ── Bloc coût ── */
+.cost-block { background: #EEEDFE; border: 0.5px solid #AFA9EC; border-radius: 14px; padding: 1.25rem 1.25rem 1rem; margin-bottom: 1.25rem; }
+.cost-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.cost-title { font-size: 13px; font-weight: 500; color: #3C3489; text-transform: uppercase; letter-spacing: 0.06em; }
+.cost-status { font-size: 11px; background: #fff; color: #534AB7; border-radius: 20px; padding: 3px 10px; border: 0.5px solid #AFA9EC; }
+.cost-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.cost-row { display: flex; justify-content: space-between; font-size: 13px; }
+.cr-label { color: #7F77DD; }
+.cr-val { font-weight: 500; color: #3C3489; }
+.cost-total-line { border-top: 0.5px solid #AFA9EC; padding-top: 12px; display: flex; justify-content: space-between; align-items: baseline; }
+.cost-total-label { font-size: 13px; font-weight: 500; color: #3C3489; }
+.cost-total-amount { font-size: 22px; font-weight: 500; color: #26215C; }
+.cost-total-currency { font-size: 13px; color: #7F77DD; margin-left: 4px; }
+.cost-empty { text-align: center; font-size: 13px; color: #AFA9EC; padding: 4px 0; }
+
+/* ── Bouton valider ── */
+.btn-valider {
+  width: 100%; padding: 14px; border-radius: 12px;
+  border: none; cursor: pointer; background: #534AB7; color: #fff;
+  font-size: 15px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: background .15s;
+}
+.btn-valider:hover { background: #3C3489; }
+.btn-valider svg { width: 16px; height: 16px; }

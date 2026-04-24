@@ -1,0 +1,59 @@
+<aside class="sidebar">
+
+  <!-- Logo -->
+  <div class="logo">
+    <div class="logo-title">✦ HôtelManager</div>
+    <div class="logo-sub">Gestion des chambres</div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-section">Navigation</div>
+
+    <div class="nav-item" [class.active]="activeFilter === 'all'"
+         (click)="filterChange.emit('all')">
+      <span class="nav-icon">⊞</span> Toutes les chambres
+    </div>
+
+    <div class="nav-item" [class.active]="activeFilter === 'available'"
+         (click)="filterChange.emit('available')">
+      <span class="nav-icon nav-icon--green">●</span> Disponibles
+    </div>
+
+    <div class="nav-item" [class.active]="activeFilter === 'occupied'"
+         (click)="filterChange.emit('occupied')">
+      <span class="nav-icon nav-icon--blue">●</span> Occupées
+    </div>
+
+    <div class="nav-item" [class.active]="activeFilter === 'cleaning'"
+         (click)="filterChange.emit('cleaning')">
+      <span class="nav-icon nav-icon--amber">●</span> En nettoyage
+    </div>
+
+    <div class="nav-item" [class.active]="activeFilter === 'maintenance'"
+         (click)="filterChange.emit('maintenance')">
+      <span class="nav-icon nav-icon--red">●</span> En maintenance
+    </div>
+  </nav>
+
+  <!-- Statistiques -->
+  <div class="sidebar-stats">
+    <div class="stat-chip stat-chip--available">
+      <div class="stat-val">{{ roomService.stats().available }}</div>
+      <div class="stat-lbl">Dispo</div>
+    </div>
+    <div class="stat-chip stat-chip--occupied">
+      <div class="stat-val">{{ roomService.stats().occupied }}</div>
+      <div class="stat-lbl">Occupées</div>
+    </div>
+    <div class="stat-chip stat-chip--cleaning">
+      <div class="stat-val">{{ roomService.stats().cleaning }}</div>
+      <div class="stat-lbl">Nettoyage</div>
+    </div>
+    <div class="stat-chip stat-chip--maintenance">
+      <div class="stat-val">{{ roomService.stats().maintenance }}</div>
+      <div class="stat-lbl">Maintenance</div>
+    </div>
+  </div>
+
+</aside>

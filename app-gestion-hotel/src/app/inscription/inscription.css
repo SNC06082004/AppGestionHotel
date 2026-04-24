@@ -1,0 +1,110 @@
+.inscription-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f4f6f4;
+  font-family: 'DM Sans', sans-serif;
+  padding: 2rem 1rem;
+}
+
+.inscription-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 2.2rem 2rem;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.hotel-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.8rem;
+}
+
+.hotel-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #1D9E75;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.hotel-name { font-size: 16px; font-weight: 600; margin: 0; color: #1a1a1a; }
+.hotel-sub  { font-size: 11px; color: #888; margin: 0; text-transform: uppercase; letter-spacing: 0.06em; }
+
+h2       { font-size: 22px; font-weight: 600; margin: 0 0 0.3rem; }
+.subtitle { font-size: 13px; color: #888; margin: 0 0 1.5rem; }
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.field { margin-bottom: 1rem; }
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fafafa;
+  color: #1a1a1a;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus,
+select:focus {
+  border-color: #1D9E75;
+  box-shadow: 0 0 0 3px rgba(29,158,117,0.12);
+}
+
+.btn-inscription {
+  width: 100%;
+  padding: 11px;
+  background: #1D9E75;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.4rem;
+  transition: background 0.2s;
+}
+
+.btn-inscription:hover { background: #0F6E56; }
+
+.login-link {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin-top: 1.2rem;
+}
+
+.login-link a { color: #1D9E75; text-decoration: none; font-weight: 500; }
+.login-link a:hover { text-decoration: underline; }

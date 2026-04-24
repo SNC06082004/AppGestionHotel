@@ -1,0 +1,111 @@
+.page {
+  background: var(--color-background-tertiary);
+  border-radius: 16px;
+  padding: 1.5rem;
+  min-height: 600px;
+}
+
+/* ── Topbar ── */
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px; }
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.logo-pill { background: #534AB7; color: #fff; border-radius: 10px; padding: 6px 12px; font-size: 13px; font-weight: 500; }
+.page-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.search-box { display: flex; align-items: center; gap: 8px; background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: 10px; padding: 7px 12px; min-width: 200px; }
+.search-box input { border: none; outline: none; font-size: 13px; color: var(--color-text-primary); background: transparent; width: 100%; }
+
+/* ── Stats ── */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.stat-card { background: var(--color-background-primary); border-radius: 12px; padding: 12px 14px; border: 0.5px solid var(--color-border-tertiary); }
+.s-label { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.s-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.s-sub { font-size: 11px; margin-top: 2px; }
+.s-sub.success { color: #639922; }
+.s-sub.danger  { color: #E24B4A; }
+.s-sub.warning { color: #BA7517; }
+.s-sub.purple  { color: #7F77DD; }
+
+/* ── Onglets ── */
+.tabs { display: flex; gap: 4px; margin-bottom: 1rem; background: var(--color-background-primary); border-radius: 10px; padding: 4px; border: 0.5px solid var(--color-border-tertiary); width: fit-content; flex-wrap: wrap; }
+.tab { padding: 7px 16px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--color-text-secondary); border: none; background: transparent; transition: all .15s; }
+.tab.active { background: #534AB7; color: #fff; }
+.tab:hover:not(.active) { background: var(--color-background-secondary); }
+
+/* ── Liste clients ── */
+.client-list { display: flex; flex-direction: column; gap: 8px; }
+.client-row { background: var(--color-background-primary); border-radius: 12px; padding: 12px 14px; border: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color .15s; }
+.client-row:hover { border-color: #AFA9EC; }
+.client-row.open { border-color: #534AB7; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #534AB7; flex-shrink: 0; }
+.client-info { flex: 1; min-width: 0; }
+.ci-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.ci-meta { font-size: 12px; color: var(--color-text-secondary); margin-top: 1px; }
+.badges { display: flex; gap: 5px; flex-wrap: wrap; }
+.badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.badge-fid     { background: #EEEDFE; color: #3C3489; }
+.badge-plainte { background: #FCEBEB; color: #A32D2D; }
+.badge-special { background: #FAEEDA; color: #633806; }
+.badge-ok      { background: #EAF3DE; color: #27500A; }
+.chevron { color: var(--color-text-tertiary); font-size: 11px; transition: transform .2s; flex-shrink: 0; }
+.chevron.open { transform: rotate(180deg); }
+
+/* ── Détail client ── */
+.client-detail { background: #EEEDFE; border-radius: 10px; padding: 12px 14px; margin-top: 4px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.d-label { font-size: 11px; color: #7F77DD; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+.d-val { font-size: 13px; font-weight: 500; color: #26215C; }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-action { font-size: 12px; padding: 6px 12px; border-radius: 8px; border: 0.5px solid #AFA9EC; background: #fff; color: #534AB7; cursor: pointer; font-weight: 500; transition: background .15s; }
+.btn-action:hover { background: #EEEDFE; }
+
+/* ── Formulaires ── */
+.form-card { background: var(--color-background-primary); border-radius: 12px; padding: 1.25rem; border: 0.5px solid var(--color-border-tertiary); margin-bottom: 10px; }
+.form-card h3 { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 12px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-group label { font-size: 12px; color: var(--color-text-secondary); font-weight: 500; }
+.field-group input,
+.field-group select,
+.field-group textarea { border: 0.5px solid var(--color-border-secondary); border-radius: 8px; padding: 8px 10px; font-size: 13px; color: var(--color-text-primary); background: var(--color-background-primary); outline: none; transition: border-color .15s; width: 100%; }
+.field-group input:focus,
+.field-group select:focus,
+.field-group textarea:focus { border-color: #534AB7; }
+.field-group textarea { resize: vertical; min-height: 70px; }
+.full { grid-column: 1 / -1; }
+.btn-submit { padding: 9px 20px; border-radius: 9px; border: none; background: #534AB7; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s; }
+.btn-submit:hover { background: #3C3489; }
+
+/* ── Items (plaintes / demandes) ── */
+.plainte-list,
+.special-list,
+.fid-list { display: flex; flex-direction: column; gap: 8px; }
+.item-row { background: var(--color-background-primary); border-radius: 10px; padding: 12px 14px; border: 0.5px solid var(--color-border-tertiary); display: flex; align-items: flex-start; gap: 10px; }
+.item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.dot-red    { background: #E24B4A; }
+.dot-amber  { background: #EF9F27; }
+.dot-green  { background: #639922; }
+.dot-purple { background: #7F77DD; }
+.item-body { flex: 1; min-width: 0; }
+.item-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+.item-meta  { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.item-status { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
+.st-open     { background: #FCEBEB; color: #A32D2D; }
+.st-progress { background: #FAEEDA; color: #633806; }
+.st-done     { background: #EAF3DE; color: #27500A; }
+
+/* ── Fidélité ── */
+.fid-card { background: var(--color-background-primary); border-radius: 12px; padding: 14px; border: 0.5px solid var(--color-border-tertiary); }
+.fid-list { gap: 10px; }
+.fid-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.fid-avatar { width: 36px; height: 36px; border-radius: 50%; background: #EEEDFE; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: #534AB7; }
+.fid-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.fid-num  { font-size: 11px; color: var(--color-text-secondary); }
+.fid-tier { margin-left: auto; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.tier-bronze { background: #FAEEDA; color: #633806; }
+.tier-silver { background: #F1EFE8; color: #5F5E5A; }
+.tier-gold   { background: #FAC775; color: #412402; }
+.points-bar-wrap { margin-bottom: 8px; }
+.points-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.points-bar { height: 6px; background: var(--color-border-tertiary); border-radius: 3px; overflow: hidden; }
+.points-fill { height: 100%; border-radius: 3px; background: #534AB7; transition: width .3s; }
+.fid-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--color-text-secondary); flex-wrap: wrap; gap: 4px; }
+.pts-restants { color: #534AB7; font-weight: 500; }
