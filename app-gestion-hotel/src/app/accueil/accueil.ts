@@ -104,8 +104,8 @@ export class Accueil {
   /* ── Modules de navigation ── */
   modules: Module[] = [
     { icon: '⚙️', label: 'Administration',     route: '/admin' },
-    { icon: '📅', label: 'Réservations',        route: '/reservations' },
-    { icon: '💬', label: 'Plaintes & Demandes', route: '/plaintes' },
+    { icon: '📅', label: 'Réservations',        route: '/Dashboard' },
+    { icon: '💬', label: 'Plaintes & Demandes', route: '/plainteetdemande' },
     { icon: '🎖️', label: 'Cartes fidélité',     route: '/fidelite' },
     { icon: '💲', label: 'Gestion des tarifs',  route: '/tarifs' },
   ];

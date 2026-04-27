@@ -1,0 +1,199 @@
+<div class="plainte-container">
+  <!-- Afficher l'utilisateur connecté -->
+  <div class="user-info" *ngIf="currentUser">
+    <div class="user-card">
+      <span class="user-icon">👤</span>
+      <div class="user-details">
+        <p class="user-name">{{ currentUser.prenom }} {{ currentUser.nom }}</p>
+        <p class="user-email">{{ currentUser.email }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message si pas connecté -->
+  <div class="alert alert-warning" *ngIf="!currentUser">
+    ⚠️ Vous n'êtes pas connecté. Veuillez vous connecter pour accéder à cette page.
+  </div>
+
+  <div *ngIf="currentUser">
+    <!-- Messages d'erreur et succès -->
+    <div class="alert alert-error" *ngIf="errorMessage">
+      ❌ {{ errorMessage }}
+    </div>
+
+    <div class="alert alert-success" *ngIf="successMessage">
+      ✅ {{ successMessage }}
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button 
+        class="tab-button"
+        [class.active]="activeTab === 'request'"
+        (click)="switchTab('request')"
+        [disabled]="isSubmitting"
+      >
+        <span class="tab-icon">⭐</span>
+        Nouvelle demande spéciale
+      </button>
+      <button 
+        class="tab-button"
+        [class.active]="activeTab === 'complaint'"
+        (click)="switchTab('complaint')"
+        [disabled]="isSubmitting"
+      >
+        <span class="tab-icon">⚠️</span>
+        Nouvelle plainte
+      </button>
+    </div>
+
+    <!-- Formulaire Demande Spéciale -->
+    <div *ngIf="activeTab === 'request'" class="form-section">
+      <h2>📝 Nouvelle demande spéciale</h2>
+      <p class="form-subtitle">Soumettez votre demande spéciale - Elle sera traitée dans les meilleurs délais</p>
+      
+      <form [formGroup]="specialRequestForm" (ngSubmit)="submitSpecialRequest()">
+        
+        <!-- Type de préférence -->
+        <div class="form-group">
+          <label for="preferenceType">
+            <span class="label-required">*</span> Type de préférence
+          </label>
+          <select 
+            id="preferenceType"
+            formControlName="preferenceType" 
+            class="form-control"
+            [class.input-error]="isRequestInvalid('preferenceType')"
+          >
+            <option value="" disabled>Sélectionner un type</option>
+            <option *ngFor="let type of preferenceTypes" [value]="type">
+              {{ type }}
+            </option>
+          </select>
+          <span class="error-msg" *ngIf="isRequestInvalid('preferenceType')">
+            Veuillez sélectionner un type de préférence
+          </span>
+        </div>
+
+        <!-- Détails -->
+        <div class="form-group">
+          <label for="details-request">
+            <span class="label-required">*</span> Détails de votre demande
+          </label>
+          <textarea 
+            id="details-request"
+            formControlName="details" 
+            class="form-control"
+            [class.input-error]="isRequestInvalid('details')"
+            placeholder="Décrivez votre demande en détail (minimum 10 caractères)..."
+            rows="5"
+          ></textarea>
+          <span class="error-msg" *ngIf="isRequestInvalid('details')">
+            <span *ngIf="fSpecialRequest['details'].errors?.['required']">Ce champ est obligatoire</span>
+            <span *ngIf="fSpecialRequest['details'].errors?.['minlength']">Minimum 10 caractères</span>
+          </span>
+        </div>
+
+        <!-- Date souhaitée -->
+        <div class="form-group">
+          <label for="requestedDate">
+            <span class="label-required">*</span> Date souhaitée
+          </label>
+          <input 
+            id="requestedDate"
+            type="date" 
+            formControlName="requestedDate"
+            class="form-control"
+            [class.input-error]="isRequestInvalid('requestedDate')"
+          />
+          <span class="error-msg" *ngIf="isRequestInvalid('requestedDate')">
+            Veuillez sélectionner une date
+          </span>
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn-submit"
+          [disabled]="specialRequestForm.invalid || isSubmitting"
+        >
+          {{ isSubmitting ? '⏳ Enregistrement en cours...' : '✅ Enregistrer la demande' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Formulaire Plainte -->
+    <div *ngIf="activeTab === 'complaint'" class="form-section">
+      <h2>⚠️ Nouvelle plainte</h2>
+      <p class="form-subtitle">Signalez un problème - Nous allons le résoudre au plus vite</p>
+      
+      <form [formGroup]="complaintForm" (ngSubmit)="submitComplaint()">
+        
+        <!-- Objet -->
+        <div class="form-group">
+          <label for="subject">
+            <span class="label-required">*</span> Objet de la plainte
+          </label>
+          <input 
+            id="subject"
+            type="text" 
+            formControlName="subject" 
+            class="form-control"
+            [class.input-error]="isComplaintInvalid('subject')"
+            placeholder="Ex: Climatisation défectueuse"
+          />
+          <span class="error-msg" *ngIf="isComplaintInvalid('subject')">
+            <span *ngIf="fComplaint['subject'].errors?.['required']">Ce champ est obligatoire</span>
+            <span *ngIf="fComplaint['subject'].errors?.['minlength']">Minimum 5 caractères</span>
+          </span>
+        </div>
+
+        <!-- Priorité -->
+        <div class="form-group">
+          <label for="priority">
+            <span class="label-required">*</span> Priorité
+          </label>
+          <select 
+            id="priority"
+            formControlName="priority" 
+            class="form-control"
+            [class.input-error]="isComplaintInvalid('priority')"
+          >
+            <option *ngFor="let priority of priorities" [value]="priority">
+              {{ priority }}
+            </option>
+          </select>
+          <span class="error-msg" *ngIf="isComplaintInvalid('priority')">
+            Veuillez sélectionner une priorité
+          </span>
+        </div>
+
+        <!-- Détails -->
+        <div class="form-group">
+          <label for="details-complaint">
+            <span class="label-required">*</span> Description détaillée
+          </label>
+          <textarea 
+            id="details-complaint"
+            formControlName="details" 
+            class="form-control"
+            [class.input-error]="isComplaintInvalid('details')"
+            placeholder="Décrivez le problème en détail (minimum 10 caractères)..."
+            rows="5"
+          ></textarea>
+          <span class="error-msg" *ngIf="isComplaintInvalid('details')">
+            <span *ngIf="fComplaint['details'].errors?.['required']">Ce champ est obligatoire</span>
+            <span *ngIf="fComplaint['details'].errors?.['minlength']">Minimum 10 caractères</span>
+          </span>
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn-submit"
+          [disabled]="complaintForm.invalid || isSubmitting"
+        >
+          {{ isSubmitting ? '⏳ Enregistrement en cours...' : '✅ Enregistrer la plainte' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

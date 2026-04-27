@@ -1,31 +1,40 @@
 package app.hotel.PACK.controller;
 
-import app.hotel.PACK.DTO.InscriptionRequestDTO;
-import app.hotel.PACK.DTO.InscriptionResponseDTO;
-import app.hotel.PACK.services.ClientService;
-import jakarta.validation.Valid;
+import app.hotel.PACK.DTO.LoginRequestDTO;
+import app.hotel.PACK.DTO.AuthResponseDTO;
+import app.hotel.PACK.entities.Client;
+import app.hotel.PACK.services.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
-    private final ClientService clientService;
+    private final AuthService authService;
 
-    @PostMapping("/inscription")
-    public ResponseEntity<InscriptionResponseDTO> inscrire(
-            @Valid @RequestBody InscriptionRequestDTO dto) {
-
-        InscriptionResponseDTO response = clientService.inscrireClient(dto);
-
-        if (!response.isSucces()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
+        try {
+            AuthResponseDTO response = authService.login(request.getEmail(), request.getPassword());
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody Client client) {
+        try {
+            AuthResponseDTO response = authService.register(client);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 }

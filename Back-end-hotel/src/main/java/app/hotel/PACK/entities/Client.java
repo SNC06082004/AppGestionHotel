@@ -13,16 +13,14 @@ import java.util.List;
 @AllArgsConstructor
 public class Client extends Utilisateur {
 
-    // idUtilisateur hérité de Utilisateur sert aussi d'id pour Client (JOINED)
+    // idUtilisateur hérité de Utilisateur
+
+    // Remplacement de plaintes + demandes par une seule liste de complaints
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Complaint> complaints;
 
     @OneToOne(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private CarteFidelite carteFidelite;
-
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Plainte> plaintes;
-
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Demande> demandes;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reservation> reservations;

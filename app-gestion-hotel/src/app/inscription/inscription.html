@@ -14,7 +14,7 @@
     <h2>Créer un compte</h2>
     <p class="subtitle">Remplissez les informations pour vous inscrire</p>
 
-    <!-- Message d'erreur -->
+    <!-- Message d'erreur global (ex: erreur serveur) -->
     <div class="alert alert-error" *ngIf="messageErreur">
       {{ messageErreur }}
     </div>
@@ -24,32 +24,41 @@
       {{ messageSucces }}
     </div>
 
-    <form (ngSubmit)="onSubmit()">
+    <form [formGroup]="inscriptionForm" (ngSubmit)="onSubmit()">
 
       <!-- Nom & Prénom -->
       <div class="row">
+
         <div class="field">
           <label for="nom">Nom</label>
           <input
             id="nom"
             type="text"
-            [(ngModel)]="nom"
-            name="nom"
+            formControlName="nom"
             placeholder="Votre nom"
-            required
+            [class.input-error]="isInvalid('nom')"
           />
+          <span class="error-msg" *ngIf="isInvalid('nom')">
+            <span *ngIf="f['nom'].errors?.['required']">Le nom est obligatoire</span>
+            <span *ngIf="f['nom'].errors?.['minlength']">Minimum 2 caractères</span>
+          </span>
         </div>
+
         <div class="field">
           <label for="prenom">Prénom</label>
           <input
             id="prenom"
             type="text"
-            [(ngModel)]="prenom"
-            name="prenom"
+            formControlName="prenom"
             placeholder="Votre prénom"
-            required
+            [class.input-error]="isInvalid('prenom')"
           />
+          <span class="error-msg" *ngIf="isInvalid('prenom')">
+            <span *ngIf="f['prenom'].errors?.['required']">Le prénom est obligatoire</span>
+            <span *ngIf="f['prenom'].errors?.['minlength']">Minimum 2 caractères</span>
+          </span>
         </div>
+
       </div>
 
       <!-- Email -->
@@ -58,11 +67,15 @@
         <input
           id="email"
           type="email"
-          [(ngModel)]="email"
-          name="email"
+          formControlName="email"
           placeholder="exemple@hotel.com"
-          required
+          [class.input-error]="isInvalid('email')"
         />
+        <span class="error-msg" *ngIf="isInvalid('email')">
+          <span *ngIf="f['email'].errors?.['required']">L'email est obligatoire</span>
+          <span *ngIf="f['email'].errors?.['email']">Format email invalide</span>
+          <span *ngIf="f['email'].errors?.['emailExistant']">Cet email est déjà associé à un compte</span>
+        </span>
       </div>
 
       <!-- Téléphone -->
@@ -71,11 +84,14 @@
         <input
           id="telephone"
           type="tel"
-          [(ngModel)]="telephone"
-          name="telephone"
+          formControlName="telephone"
           placeholder="+226 XX XX XX XX"
-          required
+          [class.input-error]="isInvalid('telephone')"
         />
+        <span class="error-msg" *ngIf="isInvalid('telephone')">
+          <span *ngIf="f['telephone'].errors?.['required']">Le téléphone est obligatoire</span>
+          <span *ngIf="f['telephone'].errors?.['pattern']">Format invalide (ex: +226 70 00 00 00)</span>
+        </span>
       </div>
 
       <!-- Mot de passe -->
@@ -84,14 +100,23 @@
         <input
           id="motDePasse"
           type="password"
-          [(ngModel)]="motDePasse"
-          name="motDePasse"
-          placeholder="Choisissez un mot de passe"
-          required
+          formControlName="motDePasse"
+          placeholder="Minimum 6 caractères"
+          [class.input-error]="isInvalid('motDePasse')"
         />
+        <span class="error-msg" *ngIf="isInvalid('motDePasse')">
+          <span *ngIf="f['motDePasse'].errors?.['required']">Le mot de passe est obligatoire</span>
+          <span *ngIf="f['motDePasse'].errors?.['minlength']">Minimum 6 caractères</span>
+        </span>
       </div>
 
-      <button type="submit" class="btn-inscription" [disabled]="isLoading">
+      <!-- Bouton grisé si formulaire invalide OU chargement en cours -->
+      <button
+        type="submit"
+        class="btn-inscription"
+        [disabled]="inscriptionForm.invalid || isLoading"
+        [class.btn-disabled]="inscriptionForm.invalid || isLoading"
+      >
         <span *ngIf="!isLoading">S'inscrire</span>
         <span *ngIf="isLoading">Inscription en cours...</span>
       </button>

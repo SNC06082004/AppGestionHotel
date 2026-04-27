@@ -111,3 +111,47 @@ input:focus {
 .register-link { text-align: center; font-size: 13px; color: #666; }
 .register-link a { color: #1D9E75; text-decoration: none; font-weight: 500; }
 .register-link a:hover { text-decoration: underline; }
+
+/* Styles existants + ajouter : */
+
+/* Champ en erreur — bordure rouge */
+.input-error {
+  border-color: #e53e3e !important;
+  background-color: #fff5f5;
+}
+
+.input-error:focus {
+  outline-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
+}
+
+/* Message d'erreur sous le champ */
+.error-msg {
+  display: block;
+  color: #e53e3e;
+  font-size: 0.78rem;
+  margin-top: 4px;
+  margin-left: 2px;
+}
+
+/* Message d'alerte global en haut */
+.alert {
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.alert-error {
+  background-color: #fff5f5;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+/* Bouton grisé quand désactivé */
+.btn-disabled,
+.btn-login:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
