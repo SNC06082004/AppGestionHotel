@@ -15,7 +15,6 @@
     <!-- ── CORPS ── -->
     <div class="modal-body">
 
-      <!-- VUE GÉNÉRALE -->
       @if (action() === null) {
 
         <div class="current-status">
@@ -26,7 +25,7 @@
         </div>
 
         <!-- Fiche client actuel -->
-        @if (room.status === 'occupied' && room.guest) {
+        @if (room.status === 'OCCUPEE' && room.guest) {
           <div class="info-card info-blue">
             <div class="info-card-title">Client actuel</div>
             <div class="guest-name">{{ room.guest.name }}</div>
@@ -43,7 +42,7 @@
         }
 
         <!-- Fiche personnel assigné -->
-        @if ((room.status === 'cleaning' || room.status === 'maintenance') && room.staff) {
+        @if ((room.status === 'EN_NETTOYAGE' || room.status === 'EN_MAINTENANCE') && room.staff) {
           <div class="info-card info-grey">
             <div>Personnel : <strong>{{ room.staff }}</strong></div>
             @if (room.notes) {
@@ -63,37 +62,41 @@
         </div>
       }
 
-      <!-- FORMULAIRE NETTOYAGE -->
-      @if (action() === 'cleaning') {
-        <div class="form-group">
-          <label class="form-label" for="cleaningStaff">Assigner au personnel *</label>
-          <select id="cleaningStaff" class="form-select" [(ngModel)]="cleaningStaff">
-            <option value="">-- Choisir un agent --</option>
-            @for (s of staffList; track s) {
-              <option [value]="s">{{ s }}</option>
-            }
-          </select>
-        </div>
+   <!-- FORMULAIRE NETTOYAGE -->
+@if (action() === 'cleaning') {
+  <div class="form-group">
+    <label class="form-label" for="cleaningStaff">Assigner au personnel *</label>
+    <select id="cleaningStaff" class="form-select" [(ngModel)]="selectedCleaningStaff">
+      <option value="">-- Choisir un agent --</option>
+      @for (s of cleaningStaff(); track s.id) {
+        <option [value]="s.nom + ' ' + s.prenom">
+          {{ s.prenom }} {{ s.nom }}
+        </option>
       }
+    </select>
+  </div>
+}
 
-      <!-- FORMULAIRE MAINTENANCE -->
-      @if (action() === 'maintenance') {
-        <div class="form-group">
-          <label class="form-label" for="maintenanceStaff">Assigner au technicien *</label>
-          <select id="maintenanceStaff" class="form-select" [(ngModel)]="maintenanceStaff">
-            <option value="">-- Choisir un technicien --</option>
-            @for (s of staffList; track s) {
-              <option [value]="s">{{ s }}</option>
-            }
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="maintenanceNotes">Description du problème</label>
-          <textarea id="maintenanceNotes" class="form-textarea"
-                    [(ngModel)]="maintenanceNotes"
-                    placeholder="Ex: Climatisation en panne..."></textarea>
-        </div>
+<!-- FORMULAIRE MAINTENANCE -->
+@if (action() === 'maintenance') {
+  <div class="form-group">
+    <label class="form-label" for="maintenanceStaff">Assigner au technicien *</label>
+    <select id="maintenanceStaff" class="form-select" [(ngModel)]="selectedMaintenanceStaff">
+      <option value="">-- Choisir un technicien --</option>
+      @for (s of maintenanceStaff(); track s.id) {
+        <option [value]="s.nom + ' ' + s.prenom">
+          {{ s.prenom }} {{ s.nom }}
+        </option>
       }
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label" for="maintenanceNotes">Description du problème</label>
+    <textarea id="maintenanceNotes" class="form-textarea"
+              [(ngModel)]="maintenanceNotes"
+              placeholder="Ex: Climatisation en panne..."></textarea>
+  </div>
+}
 
       <!-- FORMULAIRE CLIENT -->
       @if (action() === 'guest') {
@@ -130,7 +133,7 @@
         </div>
       }
 
-    </div><!-- /modal-body -->
+    </div>
 
     <!-- ── PIED ── -->
     <div class="modal-footer">
@@ -157,5 +160,5 @@
       }
     </div>
 
-  </div><!-- /modal -->
-</div><!-- /overlay -->
+  </div>
+</div>

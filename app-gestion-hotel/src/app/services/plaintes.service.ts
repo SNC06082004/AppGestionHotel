@@ -31,11 +31,11 @@ export class PlaintesService {
   }
 
   // ✅ Accepte ComplaintRequest pour mettre à jour
-  updatePlainte(id: string, complaint: ComplaintRequest): Observable<ComplaintResponse> {
+  updatePlainte(id: number, complaint: ComplaintRequest): Observable<ComplaintResponse> {
     return this.http.put<ComplaintResponse>(`${this.apiUrl}/complaints/${id}`, complaint);
   }
 
-  deletePlainte(id: string): Observable<void> {
+  deletePlainte(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/complaints/${id}`);
   }
 }

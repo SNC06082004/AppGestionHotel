@@ -1,0 +1,238 @@
+<div class="admin-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <h1>⚙️ Tableau de bord administrateur</h1>
+      <div class="admin-info" *ngIf="currentUser">
+        <span class="admin-badge">👤 ADMIN</span>
+        <p>{{ currentUser.prenom }} {{ currentUser.nom }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="alert alert-error" *ngIf="errorMessage">
+    ❌ {{ errorMessage }}
+  </div>
+  <div class="alert alert-success" *ngIf="successMessage">
+    ✅ {{ successMessage }}
+  </div>
+
+  <div class="admin-content">
+    <!-- Formulaire -->
+    <div class="form-section">
+      <h2>{{ isEditing ? '✏️ Modifier' : '➕ Créer' }} un utilisateur</h2>
+      
+      <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Type d'utilisateur -->
+        <div class="form-group">
+          <label for="userType">
+            <span class="label-required">*</span> Type d'utilisateur
+          </label>
+          <select 
+            id="userType"
+            formControlName="userType" 
+            class="form-control"
+          >
+            <option value="CLIENT">CLIENT</option>
+            <option value="PERSONNEL">PERSONNEL</option>
+            <option value="RECEPTIONNISTE">RECEPTIONNISTE</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+
+        <!-- Nom & Prénom -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nom">
+              <span class="label-required">*</span> Nom
+            </label>
+            <input
+              id="nom"
+              type="text"
+              formControlName="nom"
+              class="form-control"
+              [class.input-error]="isInvalid('nom')"
+              placeholder="Dupont"
+            />
+            <span class="error-msg" *ngIf="isInvalid('nom')">
+              Minimum 2 caractères
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="prenom">
+              <span class="label-required">*</span> Prénom
+            </label>
+            <input
+              id="prenom"
+              type="text"
+              formControlName="prenom"
+              class="form-control"
+              [class.input-error]="isInvalid('prenom')"
+              placeholder="Jean"
+            />
+            <span class="error-msg" *ngIf="isInvalid('prenom')">
+              Minimum 2 caractères
+            </span>
+          </div>
+        </div>
+
+        <!-- Email & Téléphone -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">
+              <span class="label-required">*</span> Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="form-control"
+              [class.input-error]="isInvalid('email')"
+              placeholder="email@hotel.com"
+            />
+            <span class="error-msg" *ngIf="isInvalid('email')">
+              Email invalide
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="telephone">
+              <span class="label-required">*</span> Téléphone
+            </label>
+            <input
+              id="telephone"
+              type="tel"
+              formControlName="telephone"
+              class="form-control"
+              [class.input-error]="isInvalid('telephone')"
+              placeholder="+226 70 00 00 00"
+            />
+            <span class="error-msg" *ngIf="isInvalid('telephone')">
+              Format invalide
+            </span>
+          </div>
+        </div>
+
+        <!-- Boutons -->
+        <div class="form-buttons">
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="userForm.invalid || isSubmitting"
+          >
+            {{ isSubmitting ? '⏳ Traitement...' : (isEditing ? '💾 Modifier' : '➕ Créer') }}
+          </button>
+          
+          <button 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="resetForm()"
+            *ngIf="isEditing"
+          >
+            ❌ Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Liste des utilisateurs -->
+    <div class="users-section">
+           <!-- Tabs -->
+      <div class="tabs">
+        <button 
+          *ngFor="let type of userTypes"
+          class="tab-button"
+          [class.active]="activeTab === type"
+          (click)="switchTab(type)"
+        >
+          {{ type }} ({{ getUserCountByType(type) }})
+        </button>
+      </div>
+
+      <!-- Recherche -->
+      <div class="search-bar">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          placeholder="🔍 Rechercher par nom, prénom ou email..."
+          class="search-input"
+        />
+      </div>
+
+      <!-- Tableau -->
+      <div class="table-container">
+        <table class="users-table" *ngIf="paginatedUsers.length > 0; else noUsers">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of paginatedUsers">
+              <td>{{ user.id }}</td>
+              <td>{{ user.nom }}</td>
+              <td>{{ user.prenom }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.telephone || '-' }}</td>
+              <td>
+                <span class="badge" [class]="getUserTypeBadge(user.userType)">
+                  {{ user.userType || activeTab }}
+                </span>
+              </td>
+              <td class="actions">
+                <button class="btn-edit" (click)="editUser(user)" title="Modifier">
+                  ✏️
+                </button>
+                <button 
+                  class="btn-delete" 
+                  (click)="deleteUser(user.id, user.nom + ' ' + user.prenom)"
+                  title="Supprimer"
+                >
+                  🗑️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <ng-template #noUsers>
+          <div class="no-users">
+            📭 Aucun utilisateur {{ activeTab | lowercase }}
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button 
+          class="btn-pagination"
+          (click)="previousPage()"
+          [disabled]="currentPage === 1"
+        >
+          ← Précédent
+        </button>
+        
+        <span class="page-info">
+          Page {{ currentPage }} / {{ totalPages }}
+        </span>
+        
+        <button 
+          class="btn-pagination"
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Suivant →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

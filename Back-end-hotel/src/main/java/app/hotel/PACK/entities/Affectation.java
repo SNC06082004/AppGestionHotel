@@ -34,3 +34,4 @@ public class Affectation {
     @JoinColumn(name = "idpersonnel", nullable = false)
     private Personnel personnel;
 }
+

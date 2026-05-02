@@ -1,3 +1,5 @@
+<!-- src/app/components/add-chambre/add-chambre.component.html -->
+
 <div class="form-overlay">
   <div class="form-container">
     <!-- Header -->
@@ -7,7 +9,7 @@
         <span class="form-label">Gestion des chambres</span>
         <h1 class="form-title">Nouvelle Chambre</h1>
       </div>
-      <button class="close-btn" (click)="onCancel()" aria-label="Fermer">
+      <button class="close-btn" aria-label="Fermer">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -257,7 +259,7 @@
 
       <!-- Form Actions -->
       <div class="form-actions">
-        <button type="button" class="btn-cancel" (click)="onCancel()">
+        <button type="button" class="btn-cancel" >
           Annuler
         </button>
         <button type="submit" class="btn-submit" [disabled]="chambreForm.invalid || isLoading">

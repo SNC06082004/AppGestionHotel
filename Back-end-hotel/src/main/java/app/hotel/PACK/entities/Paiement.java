@@ -14,8 +14,9 @@ import lombok.*;
 public class Paiement {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private String id;
+    private Integer id;
 
     @Column(name = "name")
     private String name;
@@ -37,3 +38,4 @@ public class Paiement {
     @JoinColumn(name = "idreservation", nullable = false, unique = true)
     private Reservation reservation;
 }
+

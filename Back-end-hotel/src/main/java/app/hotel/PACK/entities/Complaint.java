@@ -12,9 +12,9 @@ import lombok.*;
 public class Complaint {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private String id;
+    private Integer id;
 
     // 'complaint' pour une plainte, 'special-request' pour une demande spéciale
     @Column(name = "type", nullable = false)
@@ -47,3 +47,4 @@ public class Complaint {
     @JoinColumn(name = "idclient", nullable = false)
     private Client client;
 }
+

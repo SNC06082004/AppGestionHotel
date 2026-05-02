@@ -1,23 +1,19 @@
 package app.hotel.PACK.entities;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
-@Table(name = "utilisateur")
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
+@MappedSuperclass
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Utilisateur {
+public abstract class Utilisateur {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idutilisateur")
-    private Integer idUtilisateur; // Auto-incrémenté, jamais saisi par l'utilisateur
+    private Integer idUtilisateur;
 
     @Column(name = "nom", nullable = false)
     private String nom;

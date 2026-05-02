@@ -14,8 +14,9 @@ import lombok.*;
 public class CarteFidelite {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idcart")
-    private String idCart;
+    private Integer idCart;
 
     @Column(name = "initiale")
     private String initiale;
@@ -47,3 +48,5 @@ public class CarteFidelite {
     @JoinColumn(name = "idclient", nullable = false, unique = true)
     private Client client;
 }
+
+

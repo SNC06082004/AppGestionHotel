@@ -36,3 +36,4 @@ public class Notification {
     @JoinColumn(name = "idreservation", nullable = false)
     private Reservation reservation;
 }
+

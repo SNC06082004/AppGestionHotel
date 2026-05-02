@@ -1,8 +1,8 @@
 package app.hotel.PACK.controller;
 
-import app.hotel.PACK.DTO.ClientDTO;
-import app.hotel.PACK.repository.ClientRepository;
 
+import app.hotel.PACK.repository.ClientRepository;
+import app.hotel.PACK.DTO.ClientDTO;
 import app.hotel.PACK.entities.Client;
 
 import lombok.RequiredArgsConstructor;

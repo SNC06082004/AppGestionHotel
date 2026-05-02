@@ -64,7 +64,7 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ComplaintDTO> getComplaintById(String id) {
+    public Optional<ComplaintDTO> getComplaintById(Integer id) {
         return complaintRepository.findById(id)
                 .map(this::convertToDTO);
     }
@@ -115,7 +115,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public ComplaintDTO updateComplaint(String id, ComplaintDTO complaintDTO) {
+    public ComplaintDTO updateComplaint(Integer id, ComplaintDTO complaintDTO) {
         Complaint complaint = complaintRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plainte non trouvée avec l'ID: " + id));
 
@@ -140,7 +140,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public void deleteComplaint(String id) {
+    public void deleteComplaint(Integer id) {
         if (!complaintRepository.existsById(id)) {
             throw new IllegalArgumentException("Plainte non trouvée avec l'ID: " + id);
         }
@@ -148,7 +148,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public ComplaintDTO updateStatus(String id, String newStatus) {
+    public ComplaintDTO updateStatus(Integer id, String newStatus) {
         Complaint complaint = complaintRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plainte non trouvée avec l'ID: " + id));
 
@@ -160,7 +160,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     // Convertir Complaint en ComplaintDTO
     private ComplaintDTO convertToDTO(Complaint complaint) {
         return ComplaintDTO.builder()
-                .id(complaint.getId())
+                
                 .clientId(complaint.getClient().getIdUtilisateur())
                 .clientName(complaint.getClient().getPrenom() + " " + complaint.getClient().getNom())
                 .type(complaint.getType())

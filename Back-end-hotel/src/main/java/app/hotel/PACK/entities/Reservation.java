@@ -66,3 +66,4 @@ public class Reservation {
     @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Facture facture;
 }
+

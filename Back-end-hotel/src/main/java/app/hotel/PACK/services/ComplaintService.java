@@ -13,7 +13,7 @@ public interface ComplaintService {
     List<ComplaintDTO> getAllComplaints();
 
     // Récupérer par ID
-    Optional<ComplaintDTO> getComplaintById(String id);
+    Optional<ComplaintDTO> getComplaintById(Integer id);
 
     // Récupérer par client
     List<ComplaintDTO> getComplaintsByClientId(Integer clientId);
@@ -31,11 +31,11 @@ public interface ComplaintService {
     List<ComplaintDTO> getComplaintsByPriority(String priority);
 
     // Mettre à jour une plainte/demande
-    ComplaintDTO updateComplaint(String id, ComplaintDTO complaintDTO);
+    ComplaintDTO updateComplaint(Integer id, ComplaintDTO complaintDTO);
 
     // Supprimer une plainte/demande
-    void deleteComplaint(String id);
+    void deleteComplaint(Integer id);
 
     // Changer le statut
-    ComplaintDTO updateStatus(String id, String newStatus);
+    ComplaintDTO updateStatus(Integer id, String newStatus);
 }

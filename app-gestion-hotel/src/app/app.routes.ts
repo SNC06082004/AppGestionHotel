@@ -11,6 +11,7 @@ import { Addchambre } from './addchambre/addchambre';
 import { Plainte } from './plainte/plainte';
 import { Inscription } from './inscription/inscription';
 import { ConnectionC } from './connection/connection';
+import { AdminUser } from './admin-user/admin-user';
 
 
 
@@ -25,7 +26,8 @@ export const routes: Routes = [
   { path: 'gestion-clients', component: Gestionclient },
   { path: 'dashboard', component: Dashboard },
   { path: 'addchambre', component: Addchambre },
-  { path: 'plainteetdemande', component: Plainte }
+  { path: 'plainteetdemande', component: Plainte },
+  { path: 'adminUser', component: AdminUser }  
 ];
 
 

@@ -15,7 +15,7 @@
   </div>
 
   <!-- Client actuel -->
-  @if (room.status === 'occupied' && room.guest) {
+  @if (room.status === 'OCCUPEE' && room.guest) {
     <div class="room-person">
       <div class="person-name">👤 {{ room.guest.name }}</div>
       <div class="person-detail">
@@ -26,10 +26,10 @@
   }
 
   <!-- Personnel assigné -->
-  @if ((room.status === 'cleaning' || room.status === 'maintenance') && room.staff) {
+  @if ((room.status === 'EN_NETTOYAGE' || room.status === 'EN_MAINTENANCE') && room.staff) {
     <div class="room-person">
       <div class="person-name">
-        {{ room.status === 'cleaning' ? '🧹' : '🔧' }} {{ room.staff }}
+        {{ room.status === 'EN_NETTOYAGE' ? '🧹' : '🔧' }} {{ room.staff }}
       </div>
       @if (room.notes) {
         <div class="person-detail">{{ room.notes }}</div>

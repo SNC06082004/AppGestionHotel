@@ -15,23 +15,23 @@
       <span class="nav-icon">⊞</span> Toutes les chambres
     </div>
 
-    <div class="nav-item" [class.active]="activeFilter === 'available'"
-         (click)="filterChange.emit('available')">
+    <div class="nav-item" [class.active]="activeFilter === 'DISPONIBLE'"
+         (click)="filterChange.emit('DISPONIBLE')">
       <span class="nav-icon nav-icon--green">●</span> Disponibles
     </div>
 
-    <div class="nav-item" [class.active]="activeFilter === 'occupied'"
-         (click)="filterChange.emit('occupied')">
+    <div class="nav-item" [class.active]="activeFilter === 'OCCUPEE'"
+         (click)="filterChange.emit('OCCUPEE')">
       <span class="nav-icon nav-icon--blue">●</span> Occupées
     </div>
 
-    <div class="nav-item" [class.active]="activeFilter === 'cleaning'"
-         (click)="filterChange.emit('cleaning')">
+    <div class="nav-item" [class.active]="activeFilter === 'EN_NETTOYAGE'"
+         (click)="filterChange.emit('EN_NETTOYAGE')">
       <span class="nav-icon nav-icon--amber">●</span> En nettoyage
     </div>
 
-    <div class="nav-item" [class.active]="activeFilter === 'maintenance'"
-         (click)="filterChange.emit('maintenance')">
+    <div class="nav-item" [class.active]="activeFilter === 'EN_MAINTENANCE'"
+         (click)="filterChange.emit('EN_MAINTENANCE')">
       <span class="nav-icon nav-icon--red">●</span> En maintenance
     </div>
   </nav>
@@ -39,19 +39,19 @@
   <!-- Statistiques -->
   <div class="sidebar-stats">
     <div class="stat-chip stat-chip--available">
-      <div class="stat-val">{{ roomService.stats().available }}</div>
+      <div class="stat-val">{{ roomService.stats().disponible }}</div>
       <div class="stat-lbl">Dispo</div>
     </div>
     <div class="stat-chip stat-chip--occupied">
-      <div class="stat-val">{{ roomService.stats().occupied }}</div>
+      <div class="stat-val">{{ roomService.stats().occupee }}</div>
       <div class="stat-lbl">Occupées</div>
     </div>
     <div class="stat-chip stat-chip--cleaning">
-      <div class="stat-val">{{ roomService.stats().cleaning }}</div>
+      <div class="stat-val">{{ roomService.stats().en_nettoyage }}</div>
       <div class="stat-lbl">Nettoyage</div>
     </div>
     <div class="stat-chip stat-chip--maintenance">
-      <div class="stat-val">{{ roomService.stats().maintenance }}</div>
+      <div class="stat-val">{{ roomService.stats().en_maintenance }}</div>
       <div class="stat-lbl">Maintenance</div>
     </div>
   </div>

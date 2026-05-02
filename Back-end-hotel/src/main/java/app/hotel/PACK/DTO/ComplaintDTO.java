@@ -10,7 +10,7 @@ import jakarta.validation.constraints.*;
 @Builder
 public class ComplaintDTO {
 
-    private String id;
+    private Integer id;
 
     @NotNull(message = "Le clientId est obligatoire")
     private Integer clientId;

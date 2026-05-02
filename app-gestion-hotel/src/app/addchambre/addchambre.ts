@@ -1,19 +1,10 @@
+  // src/app/components/add-chambre/add-chambre.component.ts
+
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-
-export type RoomType = 'simple' | 'double' | 'suite' | 'familiale' | 'deluxe' | 'presidentielle';
-
-export interface Chambre {
-  id: string;
-  number: string;
-  floor: number;
-  type: RoomType;
-  capacity: number;
-  price: number;
-  staff?: string;
-  notes?: string;
-}
+import { ChambreService } from '../services/chambre.service';
+import { Chambre, CreateChambreRequest, ROOM_TYPES } from '../models/chambre.model';
 
 @Component({
   selector: 'app-add-room',
@@ -23,79 +14,104 @@ export interface Chambre {
   styleUrls: ['./addchambre.css'],
 })
 export class Addchambre implements OnInit {
+    
   @Output() chambreAjoutee = new EventEmitter<Chambre>();
   @Output() annuler = new EventEmitter<void>();
-
+  
   chambreForm!: FormGroup;
   isLoading = false;
-
-  roomTypes: { value: RoomType; label: string }[] = [
-    { value: 'simple',         label: 'Chambre Simple' },
-    { value: 'double',         label: 'Chambre Double' },
-    { value: 'suite',          label: 'Suite' },
-    { value: 'familiale',      label: 'Chambre Familiale' },
-    { value: 'deluxe',         label: 'Chambre Deluxe' },
-    { value: 'presidentielle', label: 'Suite Présidentielle' },
-  ];
-
-  constructor(private fb: FormBuilder) {}
-
+  roomTypes = ROOM_TYPES;
+  
+  constructor(
+    private fb: FormBuilder,
+    private chambreService: ChambreService
+  ) {}
+  
   ngOnInit(): void {
+    this.initializeForm();
+  }
+  
+  /**
+   * Initialiser le formulaire avec les validations
+   */
+  private initializeForm(): void {
     this.chambreForm = this.fb.group({
-      number:   ['', [Validators.required, Validators.minLength(1)]],
-      floor:    [null, [Validators.required, Validators.min(0)]],
-      type:     ['', Validators.required],
-      capacity: [null, [Validators.required, Validators.min(1)]],
-      price:    [null, [Validators.required, Validators.min(1)]],
-      staff:    [''],
-      notes:    ['', Validators.maxLength(500)],
+      number: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(50)]],
+      floor: [null, [Validators.required, Validators.min(0)]],
+      type: ['', Validators.required],
+      capacity: [null, [Validators.required, Validators.min(1), Validators.max(20)]],
+      price: [null, [Validators.required, Validators.min(0.01)]],
+      staff: ['', Validators.maxLength(100)],
+      notes: ['', Validators.maxLength(500)],
     });
   }
-
+  
+  /**
+   * Vérifier si un champ est invalide
+   */
   isFieldInvalid(field: string): boolean {
     const control = this.chambreForm.get(field);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
-
+  
+  /**
+   * Vérifier si un champ est valide
+   */
   isFieldValid(field: string): boolean {
     const control = this.chambreForm.get(field);
     return !!(control && control.valid && (control.dirty || control.touched));
   }
-
-  private generateId(): string {
-    return 'room-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-  }
-
+  
+  /**
+   * Soumettre le formulaire
+   */
   onSubmit(): void {
     if (this.chambreForm.invalid) {
       this.chambreForm.markAllAsTouched();
       return;
     }
-
+    
     this.isLoading = true;
-
-    // Simulate async save (replace with your service call)
-    setTimeout(() => {
-      const values = this.chambreForm.value;
-      const nouvelleChambre: Chambre = {
-        id:       this.generateId(),
-        number:   values.number.trim(),
-        floor:    Number(values.floor),
-        type:     values.type as RoomType,
-        capacity: Number(values.capacity),
-        price:    Number(values.price),
-        ...(values.staff?.trim()  ? { staff: values.staff.trim() }  : {}),
-        ...(values.notes?.trim()  ? { notes: values.notes.trim() }  : {}),
-      };
-
-      this.chambreAjoutee.emit(nouvelleChambre);
-      this.isLoading = false;
-      this.chambreForm.reset();
-    }, 800);
-  }
-
-  onCancel(): void {
-    this.annuler.emit();
-    this.chambreForm.reset();
-  }
+    
+    const formValues = this.chambreForm.value;
+    const createRequest: CreateChambreRequest = {
+      number: formValues.number.trim(),
+      floor: Number(formValues.floor),
+      type: formValues.type,
+      capacity: Number(formValues.capacity),
+      price: Number(formValues.price),
+      staff: formValues.staff?.trim() || undefined,
+      notes: formValues.notes?.trim() || undefined,
+    };
+    
+  //   this.chambreService.createChambre(createRequest).subscribe({
+  //     next: (chambre: Chambre) => {
+  //       this.chambreAjoutee.emit(chambre);
+  //       this.resetForm();
+  //       this.isLoading = false;
+  //     },
+  //     error: (error: any) => {
+  //       console.error('Erreur lors de la création de la chambre:', error);
+  //       this.isLoading = false;
+  //       // TODO: Afficher un message d'erreur à l'utilisateur
+  //     }
+  //   });
+  // }
+  
+  /**
+   * Annuler l'ajout
+   */
+  // onCancel(): void {
+  //   this.annuler.emit();
+  //   this.resetForm();
+  // }
+  
+  // /**
+  //  * Réinitialiser le formulaire
+  //  */
+  // private resetForm(): void {
+  //   this.chambreForm.reset();
+  //   this.chambreForm.markAsUntouched();
+  // }
+}
 }

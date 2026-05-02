@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ComplaintRepository extends JpaRepository<Complaint, String> {
+public interface ComplaintRepository extends JpaRepository<Complaint, Integer> {
 
     // Récupérer toutes les plaintes/demandes d'un client
     @Query("SELECT c FROM Complaint c WHERE c.client.idUtilisateur = :clientId ORDER BY c.id DESC")
@@ -32,3 +32,4 @@ public interface ComplaintRepository extends JpaRepository<Complaint, String> {
     @Query("SELECT c FROM Complaint c WHERE c.priority = :priority AND c.type = 'complaint' ORDER BY c.id DESC")
     List<Complaint> findByPriority(@Param("priority") String priority);
 }
+

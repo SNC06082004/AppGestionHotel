@@ -1,90 +1,247 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { Room, RoomStatus, Guest, RoomStats } from '../models/chambre.model';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
+import { tap, catchError, finalize } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ChambreService {
+  private readonly API_URL = 'http://localhost:8080/api/chambres';
+  private http = inject(HttpClient);
 
-  private _rooms = signal<Room[]>([
-    { id: '1',  number: '101', floor: 1, type: 'Chambre Simple', status: 'available',   capacity: 1, price: 75 },
-    { id: '2',  number: '102', floor: 1, type: 'Chambre Simple', status: 'cleaning',    capacity: 1, price: 75,  staff: 'Marie Diallo' },
-    { id: '3',  number: '103', floor: 1, type: 'Chambre Double', status: 'occupied',    capacity: 2, price: 120,
-      guest: { name: 'Jean Martin', email: 'jean@email.com', phone: '+226 70 000 001', checkIn: '2026-04-16', checkOut: '2026-04-20' } },
-    { id: '4',  number: '104', floor: 1, type: 'Chambre Double', status: 'maintenance', capacity: 2, price: 120, staff: 'Kofi Mensah', notes: 'Robinet cassé' },
-    { id: '5',  number: '201', floor: 2, type: 'Chambre Double', status: 'available',   capacity: 2, price: 130 },
-    { id: '6',  number: '202', floor: 2, type: 'Suite',          status: 'occupied',    capacity: 4, price: 250,
-      guest: { name: 'Amina Ouédraogo', email: 'amina@email.com', phone: '+226 70 000 002', checkIn: '2026-04-15', checkOut: '2026-04-22' } },
-    { id: '7',  number: '203', floor: 2, type: 'Chambre Deluxe', status: 'cleaning',    capacity: 2, price: 180, staff: 'Fatou Kone' },
-    { id: '8',  number: '204', floor: 2, type: 'Chambre Deluxe', status: 'available',   capacity: 2, price: 180 },
-    { id: '9',  number: '301', floor: 3, type: 'Suite',          status: 'available',   capacity: 4, price: 260 },
-    { id: '10', number: '302', floor: 3, type: 'Suite',          status: 'maintenance', capacity: 4, price: 260, staff: 'Ibrahim Sawadogo', notes: 'Climatisation en panne' },
-    { id: '11', number: '303', floor: 3, type: 'Chambre Deluxe', status: 'available',   capacity: 2, price: 190 },
-    { id: '12', number: '304', floor: 3, type: 'Chambre Deluxe', status: 'occupied',    capacity: 2, price: 190,
-      guest: { name: 'Paul Traoré', email: 'paul@email.com', phone: '+226 70 000 003', checkIn: '2026-04-17', checkOut: '2026-04-19' } },
-  ]);
+  // ──────────────────────────────────────
+  // SIGNALS
+  // ──────────────────────────────────────
+  private _rooms = signal<any[]>([]);
+  private _isLoading = signal(false);
+  private _error = signal<string | null>(null);
 
   readonly rooms = this._rooms.asReadonly();
+  readonly isLoading = this._isLoading.asReadonly();
+  readonly error = this._error.asReadonly();
 
-  readonly stats = computed<RoomStats>(() => {
+  readonly stats = computed(() => {
     const r = this._rooms();
     return {
-      total:       r.length,
-      available:   r.filter(x => x.status === 'available').length,
-      occupied:    r.filter(x => x.status === 'occupied').length,
-      cleaning:    r.filter(x => x.status === 'cleaning').length,
-      maintenance: r.filter(x => x.status === 'maintenance').length,
+      total: r.length,
+      disponible: r.filter(x => x.status === 'DISPONIBLE').length,
+      occupee: r.filter(x => x.status === 'OCCUPEE').length,
+      en_nettoyage: r.filter(x => x.status === 'EN_NETTOYAGE').length,
+      en_maintenance: r.filter(x => x.status === 'EN_MAINTENANCE').length,
     };
   });
 
-  getFilteredRooms(filter: RoomStatus | 'all'): Room[] {
+  constructor() {
+    this.loadRooms();
+  }
+
+  loadRooms(): void {
+    this._isLoading.set(true);
+    this._error.set(null);
+
+    this.http.get<any[]>(this.API_URL)
+      .pipe(
+        tap(rooms => {
+          this._rooms.set(rooms);
+          console.log('✅ Chambres chargées:', rooms.length);
+        }),
+        catchError(err => {
+          this._error.set('Erreur lors du chargement des chambres');
+          console.error('❌ Erreur:', err);
+          return throwError(() => err);
+        }),
+        finalize(() => this._isLoading.set(false))
+      )
+      .subscribe();
+  }
+
+  // ─────────────────────��────────────────
+  // FILTRAGE
+  // ──────────────────────────────────────
+
+  getFilteredRooms(filter: string | 'all'): any[] {
     const all = this._rooms();
     return filter === 'all' ? all : all.filter(r => r.status === filter);
   }
 
-  getFloors(filter: RoomStatus | 'all'): number[] {
-    return [...new Set(this.getFilteredRooms(filter).map(r => r.floor))].sort();
+  getFloors(filter: string | 'all'): number[] {
+    return [...new Set(this.getFilteredRooms(filter).map(r => r.floor))].sort((a, b) => a - b);
   }
 
-  getRoomsByFloor(floor: number, filter: RoomStatus | 'all'): Room[] {
+  getRoomsByFloor(floor: number, filter: string | 'all'): any[] {
     return this.getFilteredRooms(filter).filter(r => r.floor === floor);
   }
 
-  assignCleaning(roomId: string, staff: string): void {
-    this._rooms.update(rooms =>
-      rooms.map(r => r.id === roomId
-        ? { ...r, status: 'cleaning' as RoomStatus, staff, guest: undefined, notes: undefined }
-        : r)
+  getChambreById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/${id}`)
+      .pipe(
+        catchError(err => {
+          console.error('❌ Erreur:', err);
+          return throwError(() => err);
+        })
+      );
+  }
+
+  // ──────────────────────────────────────
+  // CRUD
+  // ──────────────────────────────────────
+
+  createChambre(request: any): Observable<any> {
+    this._isLoading.set(true);
+    return this.http.post<any>(this.API_URL, request)
+      .pipe(
+        tap(newRoom => {
+          this._rooms.update(rooms => [...rooms, newRoom]);
+          console.log('✅ Chambre créée:', newRoom.id);
+        }),
+        catchError(err => {
+          this._error.set('Erreur lors de la création');
+          console.error('❌ Erreur:', err);
+          return throwError(() => err);
+        }),
+        finalize(() => this._isLoading.set(false))
+      );
+  }
+
+  updateChambre(id: number, request: any): Observable<any> {
+    this._isLoading.set(true);
+    return this.http.put<any>(`${this.API_URL}/${id}`, request)
+      .pipe(
+        tap(updatedRoom => {
+          this._rooms.update(rooms =>
+            rooms.map(r => r.id === id ? updatedRoom : r)
+          );
+          console.log('✅ Chambre mise à jour:', id);
+        }),
+        catchError(err => {
+          this._error.set('Erreur lors de la mise à jour');
+          console.error('❌ Erreur:', err);
+          return throwError(() => err);
+        }),
+        finalize(() => this._isLoading.set(false))
+      );
+  }
+
+  deleteChambre(id: number): Observable<void> {
+    this._isLoading.set(true);
+    return this.http.delete<void>(`${this.API_URL}/${id}`)
+      .pipe(
+        tap(() => {
+          this._rooms.update(rooms => rooms.filter(r => r.id !== id));
+          console.log('✅ Chambre supprimée:', id);
+        }),
+        catchError(err => {
+          this._error.set('Erreur lors de la suppression');
+          console.error('❌ Erreur:', err);
+          return throwError(() => err);
+        }),
+        finalize(() => this._isLoading.set(false))
+      );
+  }
+
+  // ──────────────────────────────────────
+  // GESTION DE STATUTS
+  // ──────────────────────────────────────
+
+  assignCleaning(roomId: number, request: { staff: string }): Observable<any> {
+    return this.http.patch<any>(
+      `${this.API_URL}/${roomId}/assign-cleaning`,
+      request
+    ).pipe(
+      tap(updatedRoom => {
+        this._rooms.update(rooms =>
+          rooms.map(r => r.id === roomId ? updatedRoom : r)
+        );
+        console.log('✅ Nettoyage assigné:', roomId);
+      }),
+      catchError(err => {
+        this._error.set('Erreur lors de l\'assignation');
+        console.error('❌ Erreur:', err);
+        return throwError(() => err);
+      })
     );
   }
 
-  assignMaintenance(roomId: string, staff: string, notes?: string): void {
-    this._rooms.update(rooms =>
-      rooms.map(r => r.id === roomId
-        ? { ...r, status: 'maintenance' as RoomStatus, staff, notes, guest: undefined }
-        : r)
+  assignMaintenance(roomId: number, request: { staff: string; notes?: string }): Observable<any> {
+    return this.http.patch<any>(
+      `${this.API_URL}/${roomId}/assign-maintenance`,
+      request
+    ).pipe(
+      tap(updatedRoom => {
+        this._rooms.update(rooms =>
+          rooms.map(r => r.id === roomId ? updatedRoom : r)
+        );
+        console.log('✅ Maintenance assignée:', roomId);
+      }),
+      catchError(err => {
+        this._error.set('Erreur lors de l\'assignation');
+        console.error('❌ Erreur:', err);
+        return throwError(() => err);
+      })
     );
   }
 
-  assignGuest(roomId: string, guest: Guest): void {
-    this._rooms.update(rooms =>
-      rooms.map(r => r.id === roomId
-        ? { ...r, status: 'occupied' as RoomStatus, guest, staff: undefined, notes: undefined }
-        : r)
+  assignGuest(roomId: number, guest: any): Observable<any> {
+    return this.http.patch<any>(
+      `${this.API_URL}/${roomId}/assign-guest`,
+      { guestName: guest.name, guestEmail: guest.email, guestPhone: guest.phone, guestCheckIn: guest.checkIn, guestCheckOut: guest.checkOut }
+    ).pipe(
+      tap(updatedRoom => {
+        this._rooms.update(rooms =>
+          rooms.map(r => r.id === roomId ? updatedRoom : r)
+        );
+        console.log('✅ Client assigné:', roomId);
+      }),
+      catchError(err => {
+        this._error.set('Erreur lors de l\'assignation');
+        console.error('❌ Erreur:', err);
+        return throwError(() => err);
+      })
     );
   }
 
-  checkout(roomId: string): void {
-    this._rooms.update(rooms =>
-      rooms.map(r => r.id === roomId
-        ? { ...r, status: 'cleaning' as RoomStatus, guest: undefined, staff: undefined }
-        : r)
+  checkout(roomId: number): Observable<any> {
+    return this.http.patch<any>(
+      `${this.API_URL}/${roomId}/checkout`,
+      {}
+    ).pipe(
+      tap(updatedRoom => {
+        this._rooms.update(rooms =>
+          rooms.map(r => r.id === roomId ? updatedRoom : r)
+        );
+        console.log('✅ Check-out effectué:', roomId);
+      }),
+      catchError(err => {
+        this._error.set('Erreur lors du check-out');
+        console.error('❌ Erreur:', err);
+        return throwError(() => err);
+      })
     );
   }
 
-  markAvailable(roomId: string): void {
-    this._rooms.update(rooms =>
-      rooms.map(r => r.id === roomId
-        ? { ...r, status: 'available' as RoomStatus, guest: undefined, staff: undefined, notes: undefined }
-        : r)
+  markAvailable(roomId: number): Observable<any> {
+    return this.http.patch<any>(
+      `${this.API_URL}/${roomId}/mark-available`,
+      {}
+    ).pipe(
+      tap(updatedRoom => {
+        this._rooms.update(rooms =>
+          rooms.map(r => r.id === roomId ? updatedRoom : r)
+        );
+        console.log('✅ Chambre marquée disponible:', roomId);
+      }),
+      catchError(err => {
+        this._error.set('Erreur lors de la mise à jour');
+        console.error('❌ Erreur:', err);
+        return throwError(() => err);
+      })
     );
+  }
+
+  clearError(): void {
+    this._error.set(null);
+  }
+
+  refresh(): void {
+    this.loadRooms();
   }
 }

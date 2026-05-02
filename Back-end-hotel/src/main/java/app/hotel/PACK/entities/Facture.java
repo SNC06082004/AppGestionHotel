@@ -31,3 +31,4 @@ public class Facture {
     @JoinColumn(name = "idreservation", nullable = false, unique = true)
     private Reservation reservation;
 }
+
