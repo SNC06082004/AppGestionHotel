@@ -142,62 +142,20 @@ export class ChambreService {
   // GESTION DE STATUTS
   // ──────────────────────────────────────
 
-  assignCleaning(roomId: number, request: { staff: string }): Observable<any> {
-    return this.http.patch<any>(
-      `${this.API_URL}/${roomId}/assign-cleaning`,
-      request
-    ).pipe(
-      tap(updatedRoom => {
-        this._rooms.update(rooms =>
-          rooms.map(r => r.id === roomId ? updatedRoom : r)
-        );
-        console.log('✅ Nettoyage assigné:', roomId);
-      }),
-      catchError(err => {
-        this._error.set('Erreur lors de l\'assignation');
-        console.error('❌ Erreur:', err);
-        return throwError(() => err);
-      })
-    );
-  }
+  assignCleaning(roomId: number, request: { personnelId: number }): Observable<any> {
+  return this.http.patch<any>(`${this.API_URL}/${roomId}/assign-cleaning`, request)
+    .pipe(tap(u => this._rooms.update(r => r.map(x => x.id === roomId ? u : x))));
+}
 
-  assignMaintenance(roomId: number, request: { staff: string; notes?: string }): Observable<any> {
-    return this.http.patch<any>(
-      `${this.API_URL}/${roomId}/assign-maintenance`,
-      request
-    ).pipe(
-      tap(updatedRoom => {
-        this._rooms.update(rooms =>
-          rooms.map(r => r.id === roomId ? updatedRoom : r)
-        );
-        console.log('✅ Maintenance assignée:', roomId);
-      }),
-      catchError(err => {
-        this._error.set('Erreur lors de l\'assignation');
-        console.error('❌ Erreur:', err);
-        return throwError(() => err);
-      })
-    );
-  }
+assignMaintenance(roomId: number, request: { personnelId: number; notes?: string }): Observable<any> {
+  return this.http.patch<any>(`${this.API_URL}/${roomId}/assign-maintenance`, request)
+    .pipe(tap(u => this._rooms.update(r => r.map(x => x.id === roomId ? u : x))));
+}
 
-  assignGuest(roomId: number, guest: any): Observable<any> {
-    return this.http.patch<any>(
-      `${this.API_URL}/${roomId}/assign-guest`,
-      { guestName: guest.name, guestEmail: guest.email, guestPhone: guest.phone, guestCheckIn: guest.checkIn, guestCheckOut: guest.checkOut }
-    ).pipe(
-      tap(updatedRoom => {
-        this._rooms.update(rooms =>
-          rooms.map(r => r.id === roomId ? updatedRoom : r)
-        );
-        console.log('✅ Client assigné:', roomId);
-      }),
-      catchError(err => {
-        this._error.set('Erreur lors de l\'assignation');
-        console.error('❌ Erreur:', err);
-        return throwError(() => err);
-      })
-    );
-  }
+assignGuest(roomId: number, guest: { clientId: number; checkIn: string; checkOut: string }): Observable<any> {
+  return this.http.patch<any>(`${this.API_URL}/${roomId}/assign-guest`, guest)
+    .pipe(tap(u => this._rooms.update(r => r.map(x => x.id === roomId ? u : x))));
+}
 
   checkout(roomId: number): Observable<any> {
     return this.http.patch<any>(

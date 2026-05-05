@@ -14,3 +14,4 @@ export class Sidebar {
  
   roomService = inject(ChambreService);
 }
+

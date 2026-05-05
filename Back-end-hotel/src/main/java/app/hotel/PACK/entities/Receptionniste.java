@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Receptionniste extends Utilisateur {
 
     public String creerClient() {
@@ -19,3 +19,4 @@ public class Receptionniste extends Utilisateur {
         return "Client modifie par la receptionniste";
     }
 }
+

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ChambreService } from '../services/chambre.service';
 import { PersonnelService } from '../services/personnel.service';
 import { Room, Guest, ActionEvent } from '../models/chambre.model';
+import { ClientService } from '../client.service';
 
 type ModalAction = null | 'cleaning' | 'maintenance' | 'guest';
 
@@ -33,17 +34,55 @@ export class Roommodal implements OnInit {
   selectedMaintenanceStaff = '';
   maintenanceNotes = '';
 
-  // ────── CLIENT ──────
-  guestName = '';
-  guestEmail = '';
-  guestPhone = '';
+    // ────── CLIENT (nouveau) ──────
+  clients = signal<any[]>([]);
+  filteredClients = signal<any[]>([]);
+  clientSearchTerm = '';
+  selectedClient: any = null;
+  showClientDropdown = false;
   guestCheckIn = new Date().toISOString().split('T')[0];
   guestCheckOut = '';
 
+  private clientService = inject(ClientService); // ✅ Ajouter
+
   ngOnInit(): void {
     this.loadPersonnel();
+    this.loadClients();
   }
 
+  loadClients(): void {
+    this.clientService.getAllClients().subscribe({
+      next: (clients) => {
+        console.log('👥 Clients chargés:', clients);
+        this.clients.set(clients);
+        this.filteredClients.set(clients);
+      },
+      error: (err) => console.error('❌ Erreur clients:', err)
+    });
+  }
+
+  onClientSearch(): void {
+    const term = this.clientSearchTerm.toLowerCase();
+    if (!term) {
+      this.filteredClients.set(this.clients());
+    } else {
+      this.filteredClients.set(
+        this.clients().filter(c =>
+          c.nom.toLowerCase().includes(term) ||
+          c.prenom.toLowerCase().includes(term) ||
+          c.email.toLowerCase().includes(term)
+        )
+      );
+    }
+    this.showClientDropdown = true;
+    this.selectedClient = null;
+  }
+
+  selectClient(client: any): void {
+    this.selectedClient = client;
+    this.clientSearchTerm = `${client.prenom} ${client.nom}`;
+    this.showClientDropdown = false;
+  }
   loadPersonnel(): void {
     // ✅ Charger les femmes de chambre
     this.personnelService.getCleaningStaff().subscribe({
@@ -85,16 +124,17 @@ export class Roommodal implements OnInit {
   }
 
   setAction(a: ModalAction): void {
-    this.selectedCleaningStaff = '';
-    this.selectedMaintenanceStaff = '';
-    this.maintenanceNotes = '';
-    this.guestName = '';
-    this.guestEmail = '';
-    this.guestPhone = '';
-    this.guestCheckIn = new Date().toISOString().split('T')[0];
-    this.guestCheckOut = '';
-    this.action.set(a);
-  }
+  this.selectedCleaningStaff = '';
+  this.selectedMaintenanceStaff = '';
+  this.maintenanceNotes = '';
+  // ✅ Remplacer les anciens champs par les nouveaux
+  this.clientSearchTerm = '';
+  this.selectedClient = null;
+  this.showClientDropdown = false;
+  this.guestCheckIn = new Date().toISOString().split('T')[0];
+  this.guestCheckOut = '';
+  this.action.set(a);
+}
 
   onOverlayClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
@@ -103,88 +143,71 @@ export class Roommodal implements OnInit {
     }
   }
 
-  doAssignCleaning(): void {
-    if (!this.selectedCleaningStaff) {
-      alert('Veuillez choisir un agent.');
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.roomService.assignCleaning(this.room.id, {
-      staff: this.selectedCleaningStaff
-    }).subscribe({
-      next: () => {
-        this.actionDone.emit({
-          message: `🧹 Chambre ${this.room.number} assignée à ${this.selectedCleaningStaff}`,
-          color: 'amber',
-        });
-        this.close.emit();
-      },
-      error: (err) => {
-        console.error('❌ Erreur:', err);
-        alert('Erreur lors de l\'assignation');
-      },
-      complete: () => this.isLoading.set(false),
-    });
+doAssignCleaning(): void {
+  if (!this.selectedCleaningStaff) {
+    alert('Veuillez choisir un agent.');
+    return;
   }
+  this.isLoading.set(true);
+  this.roomService.assignCleaning(this.room.id, {
+    personnelId: Number(this.selectedCleaningStaff)  // ✅ Conversion string → number
+  }).subscribe({
+    next: () => {
+      this.actionDone.emit({ message: `🧹 Nettoyage assigné`, color: 'amber' });
+      this.close.emit();
+    },
+    error: (err) => { console.error(err); alert('Erreur'); },
+    complete: () => this.isLoading.set(false),
+  });
+}
 
-  doAssignMaintenance(): void {
-    if (!this.selectedMaintenanceStaff) {
-      alert('Veuillez choisir un technicien.');
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.roomService.assignMaintenance(this.room.id, {
-      staff: this.selectedMaintenanceStaff,
-      notes: this.maintenanceNotes || undefined
-    }).subscribe({
-      next: () => {
-        this.actionDone.emit({
-          message: `🔧 Chambre ${this.room.number} en maintenance`,
-          color: 'red',
-        });
-        this.close.emit();
-      },
-      error: (err) => {
-        console.error('❌ Erreur:', err);
-        alert('Erreur lors de l\'assignation');
-      },
-      complete: () => this.isLoading.set(false),
-    });
+doAssignMaintenance(): void {
+  if (!this.selectedMaintenanceStaff) {
+    alert('Veuillez choisir un technicien.');
+    return;
   }
+  this.isLoading.set(true);
+  this.roomService.assignMaintenance(this.room.id, {
+    personnelId: Number(this.selectedMaintenanceStaff),  // ✅ Conversion string → number
+    notes: this.maintenanceNotes || undefined
+  }).subscribe({
+    next: () => {
+      this.actionDone.emit({ message: `🔧 Maintenance assignée`, color: 'red' });
+      this.close.emit();
+    },
+    error: (err) => { console.error(err); alert('Erreur'); },
+    complete: () => this.isLoading.set(false),
+  });
+}
 
+
+ // ✅ Modifier doAssignGuest pour envoyer clientId
   doAssignGuest(): void {
-    if (!this.guestName || !this.guestCheckIn || !this.guestCheckOut) {
-      alert('Veuillez remplir les champs obligatoires (*).');
+    if (!this.selectedClient || !this.guestCheckIn || !this.guestCheckOut) {
+      alert('Veuillez sélectionner un client et les dates.');
       return;
     }
-
     if (this.guestCheckOut <= this.guestCheckIn) {
       alert("La date de départ doit être après la date d'arrivée.");
       return;
     }
 
-    const guest: Guest = {
-      name: this.guestName,
-      email: this.guestEmail,
-      phone: this.guestPhone,
+    this.isLoading.set(true);
+    this.roomService.assignGuest(this.room.id, {
+      clientId: this.selectedClient.id,
       checkIn: this.guestCheckIn,
       checkOut: this.guestCheckOut,
-    };
-
-    this.isLoading.set(true);
-    this.roomService.assignGuest(this.room.id, guest).subscribe({
+    }).subscribe({
       next: () => {
         this.actionDone.emit({
-          message: `🔑 Chambre attribuée à ${this.guestName}`,
+          message: `🔑 Chambre attribuée à ${this.selectedClient.prenom} ${this.selectedClient.nom}`,
           color: 'blue',
         });
         this.close.emit();
       },
       error: (err) => {
         console.error('❌ Erreur:', err);
-        alert('Erreur lors de l\'assignation');
+        alert("Erreur lors de l'assignation");
       },
       complete: () => this.isLoading.set(false),
     });
@@ -226,4 +249,11 @@ export class Roommodal implements OnInit {
       complete: () => this.isLoading.set(false),
     });
   }
+
+
+
+
+
+  
 }
+

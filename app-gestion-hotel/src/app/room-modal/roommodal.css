@@ -249,3 +249,44 @@
 
 .btn-success { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); margin-top: 4px; }
 .btn-success:hover { background: var(--green); color: #fff; }
+
+.client-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  background: #2a1f3d;
+  border: 1px solid #4a3860;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.client-option {
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: background 0.15s;
+}
+
+.client-option:hover { background: #3d2f55; }
+
+.client-name { font-weight: 600; color: #e8d5ff; font-size: 0.9rem; }
+
+.client-info { font-size: 0.75rem; color: #9d8ab5; }
+
+.client-empty { padding: 12px 14px; color: #9d8ab5; font-size: 0.85rem; }
+
+.selected-client-card {
+  background: #1e3a2f;
+  border: 1px solid #2d6a4f;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.selected-client-name { font-weight: 600; color: #52b788; }
+.selected-client-info { font-size: 0.8rem; color: #74c69d; margin-top: 2px; }

@@ -12,6 +12,7 @@ export interface UpdateUserRequestDTO {
   prenom: string;
   email: string;
   telephone: string;
+  roleAffectation?: string; 
 }
 
 export interface CreateUserRequestDTO extends UpdateUserRequestDTO {

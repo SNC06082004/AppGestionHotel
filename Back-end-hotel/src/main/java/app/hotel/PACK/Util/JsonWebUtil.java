@@ -39,21 +39,25 @@ public class JsonWebUtil {
     }
 
     // Generer un token
-    public String generateToken(String userId) {
-        System.out.println("[JWT] Generation du token pour userId: " + userId);
-        
-        try {
-            return Jwts.builder()
-                    .subject(userId)
-                    .issuedAt(new Date())
-                    .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                    .signWith(getSigningKey(), SignatureAlgorithm.HS512)
-                    .compact();
-        } catch (Exception e) {
-            System.err.println("[JWT] ERREUR lors de la generation du token: " + e.getMessage());
-            throw new RuntimeException("Impossible de generer le token JWT", e);
-        }
-    }
+    	public String generateToken(String userId, String role) {
+    	    return Jwts.builder()
+    	            .subject(userId)
+    	            .claim("role", role)  // ✅ Ajouter le rôle
+    	            .issuedAt(new Date())
+    	            .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+    	            .signWith(getSigningKey(), SignatureAlgorithm.HS512)
+    	            .compact();
+    	}
+
+    	// ✅ Ajouter cette méthode
+    	public String getRoleFromToken(String token) {
+    	    return Jwts.parser()
+    	            .verifyWith(getSigningKey())
+    	            .build()
+    	            .parseSignedClaims(token)
+    	            .getPayload()
+    	            .get("role", String.class);
+    	}
 
     // Recuperer l'ID utilisateur du token
     public String getUserIdFromToken(String token) {

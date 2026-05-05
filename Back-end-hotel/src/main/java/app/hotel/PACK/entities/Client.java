@@ -21,3 +21,4 @@ public class Client extends Utilisateur {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reservation> reservations;
 }
+

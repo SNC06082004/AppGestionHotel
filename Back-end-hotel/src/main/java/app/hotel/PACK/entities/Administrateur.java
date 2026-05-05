@@ -8,7 +8,8 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Administrateur extends Utilisateur {
     // Hérite de tous les champs d'Utilisateur
 }
+

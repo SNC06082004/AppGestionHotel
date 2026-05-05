@@ -1,6 +1,5 @@
 package app.hotel.PACK.DTO;
 
-import app.hotel.PACK.entities.enums.RoleAffectation;
 import lombok.*;
 
 @Getter
@@ -8,12 +7,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PersonnelDTO {
+public class AdminDTO {
     private Integer id;
     private String nom;
     private String prenom;
     private String email;
     private String telephone;
-    private RoleAffectation roleAffectation;
     private String userType;
 }

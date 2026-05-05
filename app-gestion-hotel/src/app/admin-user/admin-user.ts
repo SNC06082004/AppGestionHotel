@@ -13,10 +13,10 @@ import { UpdateUserRequestDTO } from '../models/user.model';
 @Component({
   selector: 'app-admin-user',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './admin-user.html',
   styleUrls: ['./admin-user.css'],
-  providers: [AdminService]
+ 
 })
 export class AdminUser implements OnInit, OnDestroy {
   userForm!: FormGroup;
@@ -24,7 +24,8 @@ export class AdminUser implements OnInit, OnDestroy {
   currentUser: any = null;
   userTypes: Array<'CLIENT' | 'PERSONNEL' | 'RECEPTIONNISTE' | 'ADMIN'> = ['CLIENT', 'PERSONNEL', 'RECEPTIONNISTE', 'ADMIN'];
   activeTab: 'CLIENT' | 'PERSONNEL' | 'RECEPTIONNISTE' | 'ADMIN' = 'CLIENT';
-  
+  // Ajouter cette propriété
+  rolesPersonnel: string[] = ['MANAGER', 'TECHNICIEN', 'AGENT_ACCUEIL', 'FEMME_DE_CHAMBRE', 'SECURITE'];
   users: any[] = [];
   filteredUsers: any[] = [];
   
@@ -72,15 +73,28 @@ export class AdminUser implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  initializeForm(): void {
-    this.userForm = this.fb.group({
-      nom: ['', [Validators.required, Validators.minLength(2)]],
-      prenom: ['', [Validators.required, Validators.minLength(2)]],
-      email: ['', [Validators.required, Validators.email]],
-      telephone: ['', [Validators.required, Validators.pattern(/^\+?[0-9\s]{8,15}$/)]],
-      userType: ['CLIENT', Validators.required]
-    });
-  }
+initializeForm(): void {
+  this.userForm = this.fb.group({
+    nom: ['', [Validators.required, Validators.minLength(2)]],
+    prenom: ['', [Validators.required, Validators.minLength(2)]],
+    email: ['', [Validators.required, Validators.email]],
+    telephone: ['', [Validators.required, Validators.pattern(/^\+?[0-9\s]{8,15}$/)]],
+    userType: ['CLIENT', Validators.required],
+    roleAffectation: [''] // ✅ Ajouter
+  });
+
+  // ✅ Rendre roleAffectation obligatoire seulement si PERSONNEL
+  this.userForm.get('userType')?.valueChanges.subscribe(type => {
+    const roleControl = this.userForm.get('roleAffectation');
+    if (type === 'PERSONNEL') {
+      roleControl?.setValidators(Validators.required);
+    } else {
+      roleControl?.clearValidators();
+      roleControl?.setValue('');
+    }
+    roleControl?.updateValueAndValidity();
+  });
+}
 
   get f() {
     return this.userForm.controls;
@@ -169,12 +183,13 @@ export class AdminUser implements OnInit, OnDestroy {
       });
     } else {
       // Création
-      const createData: UpdateUserRequestDTO = {
-        nom: formData.nom,
-        prenom: formData.prenom,
-        email: formData.email,
-        telephone: formData.telephone
-      };
+          const createData: UpdateUserRequestDTO = {
+            nom: formData.nom,
+            prenom: formData.prenom,
+            email: formData.email,
+            telephone: formData.telephone,
+            roleAffectation: formData.roleAffectation || null // ✅ Ajouter
+          };
 
       // Si c'est un ADMIN, utiliser l'endpoint spécifique
       const request = userType === 'ADMIN' 

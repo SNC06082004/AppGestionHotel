@@ -16,10 +16,12 @@ export class PersonnelService {
   }
 
   getCleaningStaff(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.API_URL}/cleaning`);
+    // ✅ FEMME_DE_CHAMBRE pour le nettoyage
+    return this.http.get<any[]>(`${this.API_URL}/by-type/FEMME_DE_CHAMBRE`);
   }
 
   getMaintenanceStaff(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.API_URL}/maintenance`);
+    // ✅ TECHNICIEN pour la maintenance
+    return this.http.get<any[]>(`${this.API_URL}/by-type/TECHNICIEN`);
   }
 }

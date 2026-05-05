@@ -1,6 +1,6 @@
 package app.hotel.PACK.DTO;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Getter
@@ -10,6 +10,6 @@ import lombok.*;
 @Builder
 public class AssignCleaningRequest {
 
-    @NotBlank(message = "Le personnel est obligatoire")
-    private String staff;
+    @NotNull(message = "Le personnel est obligatoire")
+    private Integer personnelId; 
 }

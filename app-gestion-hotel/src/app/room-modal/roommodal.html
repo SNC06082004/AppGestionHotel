@@ -69,7 +69,7 @@
     <select id="cleaningStaff" class="form-select" [(ngModel)]="selectedCleaningStaff">
       <option value="">-- Choisir un agent --</option>
       @for (s of cleaningStaff(); track s.id) {
-        <option [value]="s.nom + ' ' + s.prenom">
+        <option [value]="s.id">
           {{ s.prenom }} {{ s.nom }}
         </option>
       }
@@ -84,7 +84,7 @@
     <select id="maintenanceStaff" class="form-select" [(ngModel)]="selectedMaintenanceStaff">
       <option value="">-- Choisir un technicien --</option>
       @for (s of maintenanceStaff(); track s.id) {
-        <option [value]="s.nom + ' ' + s.prenom">
+        <option [value]="s.id">
           {{ s.prenom }} {{ s.nom }}
         </option>
       }
@@ -99,41 +99,58 @@
 }
 
       <!-- FORMULAIRE CLIENT -->
-      @if (action() === 'guest') {
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="guestName">Nom complet *</label>
-            <input id="guestName" class="form-input" type="text"
-                   [(ngModel)]="guestName" placeholder="Jean Martin"/>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="guestPhone">Téléphone</label>
-            <input id="guestPhone" class="form-input" type="tel"
-                   [(ngModel)]="guestPhone" placeholder="+226 70 000 000"/>
-          </div>
+          @if (action() === 'guest') {
+        <!-- Recherche client -->
+        <div class="form-group" style="position: relative;">
+          <label class="form-label">Rechercher un client *</label>
+          <input
+            class="form-input"
+            type="text"
+            [(ngModel)]="clientSearchTerm"
+            (input)="onClientSearch()"
+            (focus)="showClientDropdown = true"
+            placeholder="Nom, prénom ou email..."
+          />
+
+          <!-- Dropdown résultats -->
+          @if (showClientDropdown && filteredClients().length > 0) {
+            <div class="client-dropdown">
+              @for (client of filteredClients(); track client.id) {
+                <div class="client-option" (click)="selectClient(client)">
+                  <span class="client-name">{{ client.prenom }} {{ client.nom }}</span>
+                  <span class="client-info">{{ client.email }} · {{ client.telephone }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          @if (showClientDropdown && filteredClients().length === 0 && clientSearchTerm) {
+            <div class="client-dropdown">
+              <div class="client-empty">Aucun client trouvé</div>
+            </div>
+          }
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="guestEmail">Email</label>
-          <input id="guestEmail" class="form-input" type="email"
-                 [(ngModel)]="guestEmail" placeholder="client@email.com"/>
-        </div>
+        <!-- Client sélectionné -->
+        @if (selectedClient) {
+          <div class="selected-client-card">
+            <div class="selected-client-name">✅ {{ selectedClient.prenom }} {{ selectedClient.nom }}</div>
+            <div class="selected-client-info">{{ selectedClient.email }} · {{ selectedClient.telephone }}</div>
+          </div>
+        }
 
+        <!-- Dates -->
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="guestCheckIn">Check-in *</label>
-            <input id="guestCheckIn" class="form-input" type="date"
-                   [(ngModel)]="guestCheckIn"/>
+            <input id="guestCheckIn" class="form-input" type="date" [(ngModel)]="guestCheckIn"/>
           </div>
           <div class="form-group">
             <label class="form-label" for="guestCheckOut">Check-out *</label>
-            <input id="guestCheckOut" class="form-input" type="date"
-                   [(ngModel)]="guestCheckOut"/>
+            <input id="guestCheckOut" class="form-input" type="date" [(ngModel)]="guestCheckOut"/>
           </div>
         </div>
       }
-
-    </div>
 
     <!-- ── PIED ── -->
     <div class="modal-footer">

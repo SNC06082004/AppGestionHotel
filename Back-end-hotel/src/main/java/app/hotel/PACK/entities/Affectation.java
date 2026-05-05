@@ -35,3 +35,4 @@ public class Affectation {
     private Personnel personnel;
 }
 
+

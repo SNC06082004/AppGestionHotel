@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 @Builder
 public class UpdateUserRequestDTO {
+
     @NotBlank(message = "Le nom est obligatoire")
     @Size(min = 2, message = "Minimum 2 caractères")
     private String nom;
@@ -24,4 +25,7 @@ public class UpdateUserRequestDTO {
     @NotBlank(message = "Le téléphone est obligatoire")
     @Pattern(regexp = "^\\+?[0-9\\s]{8,15}$", message = "Format invalide")
     private String telephone;
+
+    // ✅ AJOUT — obligatoire uniquement pour le type PERSONNEL
+    private String roleAffectation;
 }

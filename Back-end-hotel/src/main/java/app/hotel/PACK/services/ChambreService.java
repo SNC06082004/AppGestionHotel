@@ -26,3 +26,4 @@ public interface ChambreService {
     ChambreDTO checkout(Integer chambreId);
     ChambreDTO markAvailable(Integer chambreId);
 }
+

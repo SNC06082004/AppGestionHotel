@@ -2,12 +2,20 @@ package app.hotel.PACK.services;
 
 import app.hotel.PACK.DTO.*;
 import app.hotel.PACK.entities.Chambre;
+import app.hotel.PACK.entities.Client;
+import app.hotel.PACK.entities.Personnel;
+import app.hotel.PACK.entities.Reservation;
 import app.hotel.PACK.entities.enums.RoomType;
 import app.hotel.PACK.entities.enums.RoomStatut;
 import app.hotel.PACK.repository.ChambreRepository;
+import app.hotel.PACK.repository.ClientRepository;
+import app.hotel.PACK.repository.PersonnelRepository;
+import app.hotel.PACK.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -107,28 +115,60 @@ public class ChambreServiceImpl implements ChambreService {
     }
 
     // ────── STATUTS ──────
+
+    private final PersonnelRepository personnelRepository;
+
     @Override
     public ChambreDTO assignCleaning(Integer id, AssignCleaningRequest request) {
         Chambre c = findOrThrow(id);
+        Personnel p = personnelRepository.findById(request.getPersonnelId())
+            .orElseThrow(() -> new IllegalArgumentException("Personnel non trouvé"));
         c.setStatut(RoomStatut.EN_NETTOYAGE);
-        c.setStaff(request.getStaff());
+        c.setStaff(p.getPrenom() + " " + p.getNom());
         return convertToDTO(chambreRepository.save(c));
     }
 
     @Override
     public ChambreDTO assignMaintenance(Integer id, AssignMaintenanceRequest request) {
         Chambre c = findOrThrow(id);
+        Personnel p = personnelRepository.findById(request.getPersonnelId())
+            .orElseThrow(() -> new IllegalArgumentException("Personnel non trouvé"));
         c.setStatut(RoomStatut.EN_MAINTENANCE);
-        c.setStaff(request.getStaff());
+        c.setStaff(p.getPrenom() + " " + p.getNom());
         c.setNotes(request.getNotes());
         return convertToDTO(chambreRepository.save(c));
     }
 
+ // Ajouter dans les dépendances
+    private final ReservationRepository reservationRepository;
+    private final ClientRepository clientRepository;
+
     @Override
     public ChambreDTO assignGuest(Integer id, AssignGuestRequest request) {
         Chambre c = findOrThrow(id);
+
+        Client client = clientRepository.findById(request.getClientId())
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Client non trouvé: " + request.getClientId()));
+
+        // Créer la réservation
+        Reservation reservation = new Reservation();
+        reservation.setClient(client);
+        reservation.setCheckIn(LocalDate.parse(request.getCheckIn()));
+        reservation.setCheckOut(LocalDate.parse(request.getCheckOut()));
+        reservation.setAdultes(1.0);
+        reservation.setEnfants(0.0);
+        reservation.setAgeEnfants(0.0);
+        reservation.setChambreNb(1.0);
+        reservation.setAvecAnimal(false);
+        reservation.setChambres(List.of(c));
+        reservationRepository.save(reservation);
+
+        // Mettre à jour la chambre
         c.setStatut(RoomStatut.OCCUPEE);
-        c.setStaff(null);
+        c.setStaff(client.getPrenom() + " " + client.getNom());
+        c.setNotes("Check-in: " + request.getCheckIn() + " | Check-out: " + request.getCheckOut());
+
         return convertToDTO(chambreRepository.save(c));
     }
 
@@ -172,3 +212,4 @@ public class ChambreServiceImpl implements ChambreService {
             .build();
     }
 }
+

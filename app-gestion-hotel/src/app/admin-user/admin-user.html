@@ -24,22 +24,38 @@
       <h2>{{ isEditing ? '✏️ Modifier' : '➕ Créer' }} un utilisateur</h2>
       
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
-        
-        <!-- Type d'utilisateur -->
+                <!-- Type d'utilisateur -->
         <div class="form-group">
           <label for="userType">
             <span class="label-required">*</span> Type d'utilisateur
           </label>
-          <select 
-            id="userType"
-            formControlName="userType" 
-            class="form-control"
-          >
+          <select id="userType" formControlName="userType" class="form-control">
             <option value="CLIENT">CLIENT</option>
             <option value="PERSONNEL">PERSONNEL</option>
             <option value="RECEPTIONNISTE">RECEPTIONNISTE</option>
             <option value="ADMIN">ADMIN</option>
           </select>
+        </div>
+
+        <!-- ✅ Rôle du personnel — affiché uniquement si PERSONNEL -->
+        <div class="form-group" *ngIf="userForm.get('userType')?.value === 'PERSONNEL'">
+          <label for="roleAffectation">
+            <span class="label-required">*</span> Rôle du personnel
+          </label>
+          <select
+            id="roleAffectation"
+            formControlName="roleAffectation"
+            class="form-control"
+            [class.input-error]="isInvalid('roleAffectation')"
+          >
+            <option value="">-- Sélectionner un rôle --</option>
+            <option *ngFor="let role of rolesPersonnel" [value]="role">
+              {{ role | titlecase }}
+            </option>
+          </select>
+          <span class="error-msg" *ngIf="isInvalid('roleAffectation')">
+            Le rôle est obligatoire pour le personnel
+          </span>
         </div>
 
         <!-- Nom & Prénom -->

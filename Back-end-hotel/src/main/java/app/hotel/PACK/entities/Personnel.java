@@ -20,3 +20,4 @@ public class Personnel extends Utilisateur {
     @OneToMany(mappedBy = "personnel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Affectation> affectations;
 }
+

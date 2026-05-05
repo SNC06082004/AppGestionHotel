@@ -34,22 +34,15 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                // ✅ Endpoints publics
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/clients/**").permitAll()
-                
-                // ✅ Endpoints de chambres PROTÉGÉS
-                .requestMatchers("/api/chambres/**").authenticated()
-                
-                // ✅ Endpoints de personnel PROTÉGÉS
-                .requestMatchers("/api/personnel/**").authenticated()
-                
-                // ✅ Endpoints de plaintes PROTÉGÉS
-                .requestMatchers("/api/complaints/**").authenticated()
-                
-                // Tout le reste
-                .anyRequest().authenticated()
-            )
+            		.requestMatchers("/api/admin/**").permitAll()
+            	    .requestMatchers("/api/auth/**").permitAll()
+            	    .requestMatchers("/api/clients/**").permitAll()
+            	    
+            	    .requestMatchers("/api/chambres/**").authenticated()
+            	    .requestMatchers("/api/personnel/**").authenticated()
+            	    .requestMatchers("/api/complaints/**").authenticated()
+            	    .anyRequest().authenticated()
+            	)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable());

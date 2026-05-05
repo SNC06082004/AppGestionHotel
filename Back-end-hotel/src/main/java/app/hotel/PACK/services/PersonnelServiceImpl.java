@@ -39,13 +39,13 @@ public class PersonnelServiceImpl implements PersonnelService {
 
     @Override
     public List<PersonnelDTO> getCleaningStaff() {
-        log.debug("🧹 Récupération du personnel nettoyage (FEMME_DE_CHAMBRE)");
+        log.debug("🧹 Récupération du personnel nettoyage");
         return this.getByType(RoleAffectation.FEMME_DE_CHAMBRE);
     }
 
     @Override
     public List<PersonnelDTO> getMaintenanceStaff() {
-        log.debug("🔧 Récupération du personnel maintenance (TECHNICIEN)");
+        log.debug("🔧 Récupération du personnel maintenance");
         return this.getByType(RoleAffectation.TECHNICIEN);
     }
 
@@ -56,7 +56,7 @@ public class PersonnelServiceImpl implements PersonnelService {
                 .prenom(personnel.getPrenom())
                 .email(personnel.getEmail())
                 .telephone(personnel.getTelephone())
-                .type(personnel.getType())
+                .roleAffectation(personnel.getType()) // ✅ était .type() → erreur
                 .build();
     }
 }

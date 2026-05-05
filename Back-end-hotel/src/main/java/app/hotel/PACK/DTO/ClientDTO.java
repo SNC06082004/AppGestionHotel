@@ -13,4 +13,5 @@ public class ClientDTO {
     private String prenom;
     private String email;
     private String telephone;
+    private String userType; // ✅ Ajouter ce champ
 }

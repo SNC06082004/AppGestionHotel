@@ -2,6 +2,7 @@ package app.hotel.PACK.services;
 
 import app.hotel.PACK.DTO.*;
 import app.hotel.PACK.entities.*;
+import app.hotel.PACK.entities.enums.RoleAffectation;
 import app.hotel.PACK.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,71 +19,26 @@ import java.util.stream.Collectors;
 @Transactional
 public class AdminUserService {
 
-    private final UtilisateurRepository utilisateurRepository;
     private final ClientRepository clientRepository;
     private final PersonnelRepository personnelRepository;
     private final ReceptionnisteRepository receptionnisteRepository;
+    private final AdministrateurRepository administrateurRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    /**
-     * Récupérer tous les utilisateurs
-     */
-    public List<?> getAllUsers() {
-        List<Object> allUsers = new ArrayList<>();
-        
-        // Ajouter les clients
-        allUsers.addAll(clientRepository.findAll()
-                .stream()
-                .map(this::convertClientToDTO)
-                .collect(Collectors.toList()));
-        
-        // Ajouter les personnels
-        allUsers.addAll(personnelRepository.findAll()
-                .stream()
-                .map(this::convertPersonnelToDTO)
-                .collect(Collectors.toList()));
-        
-        // Ajouter les réceptionnistes
-        allUsers.addAll(receptionnisteRepository.findAll()
-                .stream()
-                .map(this::convertReceptionnisteToDTO)
-                .collect(Collectors.toList()));
-        
-        return allUsers;
+    private boolean emailDejaUtilise(String email) {
+        return clientRepository.existsByEmail(email)
+            || personnelRepository.existsByEmail(email)
+            || receptionnisteRepository.existsByEmail(email)
+            || administrateurRepository.existsByEmail(email);
     }
 
-    /**
-     * Récupérer par type
-     */
-    public List<?> getUsersByType(String type) {
-        if ("CLIENT".equalsIgnoreCase(type)) {
-            return clientRepository.findAll()
-                    .stream()
-                    .map(this::convertClientToDTO)
-                    .collect(Collectors.toList());
-        } else if ("PERSONNEL".equalsIgnoreCase(type)) {
-            return personnelRepository.findAll()
-                    .stream()
-                    .map(this::convertPersonnelToDTO)
-                    .collect(Collectors.toList());
-        } else if ("RECEPTIONNISTE".equalsIgnoreCase(type)) {
-            return receptionnisteRepository.findAll()
-                    .stream()
-                    .map(this::convertReceptionnisteToDTO)
-                    .collect(Collectors.toList());
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Créer un utilisateur
-     * Utilise UpdateUserRequestDTO pour la création
-     */
+    // ── CREER ──────────────────────────────────────────────
     public Object createUser(UpdateUserRequestDTO dto, String userType) {
         if (emailDejaUtilise(dto.getEmail()))
             throw new IllegalArgumentException("Email déjà utilisé");
 
-        String motDePasse = passwordEncoder.encode(dto.getTelephone());
+        String motDePasseBrut = dto.getNom().substring(0, Math.min(3, dto.getNom().length())).toLowerCase() + "2000";
+        String motDePasse = passwordEncoder.encode(motDePasseBrut);
 
         switch (userType.toUpperCase()) {
 
@@ -109,7 +66,7 @@ public class AdminUserService {
                 personnel.setEmail(dto.getEmail());
                 personnel.setTelephone(dto.getTelephone());
                 personnel.setMotDePasse(motDePasse);
-                personnel.setType(role); // ✅ Correction bug null
+                personnel.setType(role);
                 return convertPersonnelToDTO(personnelRepository.save(personnel));
 
             case "RECEPTIONNISTE":
@@ -122,7 +79,7 @@ public class AdminUserService {
                 return convertReceptionnisteToDTO(receptionnisteRepository.save(rec));
 
             case "ADMIN":
-                Administrateur admin = new Administrateur(); // ✅ Plus un Client !
+                Administrateur admin = new Administrateur();
                 admin.setNom(dto.getNom());
                 admin.setPrenom(dto.getPrenom());
                 admin.setEmail(dto.getEmail());
@@ -135,84 +92,148 @@ public class AdminUserService {
         }
     }
 
-    /**
-     * Modifier un utilisateur
-     */
-    public Object updateUser(Integer id, UpdateUserRequestDTO userDTO) {
-        Utilisateur utilisateur = utilisateurRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
-
-        utilisateur.setNom(userDTO.getNom());
-        utilisateur.setPrenom(userDTO.getPrenom());
-        utilisateur.setEmail(userDTO.getEmail());
-        utilisateur.setTelephone(userDTO.getTelephone());
-
-        Utilisateur updated = utilisateurRepository.save(utilisateur);
-        System.out.println("[AdminUserService] ✅ Utilisateur modifié: " + id);
-
-        // Retourner le DTO approprié selon le type
-        if (updated instanceof Client) {
-            return convertClientToDTO((Client) updated);
-        } else if (updated instanceof Receptionniste) {
-            return convertReceptionnisteToDTO((Receptionniste) updated);
-        } else if (updated instanceof Personnel) {
-            return convertPersonnelToDTO((Personnel) updated);
-        }
-
-        return updated;
+    public Object createAdmin(UpdateUserRequestDTO dto) {
+        return createUser(dto, "ADMIN");
     }
 
-    /**
-     * Supprimer un utilisateur (hard delete)
-     */
+    // ── LIRE ───────────────────────────────────────────────
+    public List<?> getAllUsers() {
+        List<Object> all = new ArrayList<>();
+        all.addAll(clientRepository.findAll().stream()
+                .map(this::convertClientToDTO).collect(Collectors.toList()));
+        all.addAll(personnelRepository.findAll().stream()
+                .map(this::convertPersonnelToDTO).collect(Collectors.toList()));
+        all.addAll(receptionnisteRepository.findAll().stream()
+                .map(this::convertReceptionnisteToDTO).collect(Collectors.toList()));
+        all.addAll(administrateurRepository.findAll().stream()
+                .map(this::convertAdminToDTO).collect(Collectors.toList()));
+        return all;
+    }
+
+    public List<?> getUsersByType(String type) {
+        switch (type.toUpperCase()) {
+            case "CLIENT":
+                return clientRepository.findAll().stream()
+                        .map(this::convertClientToDTO).collect(Collectors.toList());
+            case "PERSONNEL":
+                return personnelRepository.findAll().stream()
+                        .map(this::convertPersonnelToDTO).collect(Collectors.toList());
+            case "RECEPTIONNISTE":
+                return receptionnisteRepository.findAll().stream()
+                        .map(this::convertReceptionnisteToDTO).collect(Collectors.toList());
+            case "ADMIN":
+                return administrateurRepository.findAll().stream()
+                        .map(this::convertAdminToDTO).collect(Collectors.toList());
+            default:
+                return new ArrayList<>();
+        }
+    }
+
+    // ── MODIFIER ───────────────────────────────────────────
+    public Object updateUser(Integer id, UpdateUserRequestDTO dto) {
+        Optional<Client> client = clientRepository.findById(id);
+        if (client.isPresent()) {
+            Client u = client.get();
+            u.setNom(dto.getNom());
+            u.setPrenom(dto.getPrenom());
+            u.setEmail(dto.getEmail());
+            u.setTelephone(dto.getTelephone());
+            return convertClientToDTO(clientRepository.save(u));
+        }
+
+        Optional<Personnel> personnel = personnelRepository.findById(id);
+        if (personnel.isPresent()) {
+            Personnel u = personnel.get();
+            u.setNom(dto.getNom());
+            u.setPrenom(dto.getPrenom());
+            u.setEmail(dto.getEmail());
+            u.setTelephone(dto.getTelephone());
+            return convertPersonnelToDTO(personnelRepository.save(u));
+        }
+
+        Optional<Receptionniste> rec = receptionnisteRepository.findById(id);
+        if (rec.isPresent()) {
+            Receptionniste u = rec.get();
+            u.setNom(dto.getNom());
+            u.setPrenom(dto.getPrenom());
+            u.setEmail(dto.getEmail());
+            u.setTelephone(dto.getTelephone());
+            return convertReceptionnisteToDTO(receptionnisteRepository.save(u));
+        }
+
+        Optional<Administrateur> admin = administrateurRepository.findById(id);
+        if (admin.isPresent()) {
+            Administrateur u = admin.get();
+            u.setNom(dto.getNom());
+            u.setPrenom(dto.getPrenom());
+            u.setEmail(dto.getEmail());
+            u.setTelephone(dto.getTelephone());
+            return convertAdminToDTO(administrateurRepository.save(u));
+        }
+
+        throw new IllegalArgumentException("Utilisateur non trouvé: " + id);
+    }
+
+    // ── SUPPRIMER ──────────────────────────────────────────
     public void deleteUser(Integer id) {
-        if (!utilisateurRepository.existsById(id)) {
-            throw new IllegalArgumentException("Utilisateur non trouvé");
+        if (clientRepository.existsById(id)) {
+            clientRepository.deleteById(id); return;
         }
-        utilisateurRepository.deleteById(id);
-        System.out.println("[AdminUserService] ✅ Utilisateur supprimé: " + id);
+        if (personnelRepository.existsById(id)) {
+            personnelRepository.deleteById(id); return;
+        }
+        if (receptionnisteRepository.existsById(id)) {
+            receptionnisteRepository.deleteById(id); return;
+        }
+        if (administrateurRepository.existsById(id)) {
+            administrateurRepository.deleteById(id); return;
+        }
+        throw new IllegalArgumentException("Utilisateur non trouvé: " + id);
     }
 
-    /**
-     * Créer un administrateur
-     */
-    public Object createAdmin(UpdateUserRequestDTO adminDTO) {
-        return createUser(adminDTO, "ADMIN");
-    }
-
-    // ============ Convertisseurs DTO ============
-
-    private ClientDTO convertClientToDTO(Client client) {
+    // ── CONVERTISSEURS ─────────────────────────────────────
+    private ClientDTO convertClientToDTO(Client c) {
         return ClientDTO.builder()
-                .id(client.getIdUtilisateur())
-                .nom(client.getNom())
-                .prenom(client.getPrenom())
-                .email(client.getEmail())
-                .telephone(client.getTelephone())
+                .id(c.getIdUtilisateur())
+                .nom(c.getNom())
+                .prenom(c.getPrenom())
+                .email(c.getEmail())
+                .telephone(c.getTelephone())
+                .userType("CLIENT")
                 .build();
     }
 
-    private PersonnelDTO convertPersonnelToDTO(Personnel personnel) {
+    private PersonnelDTO convertPersonnelToDTO(Personnel p) {
         return PersonnelDTO.builder()
-                .id(personnel.getIdUtilisateur())
-                .nom(personnel.getNom())
-                .prenom(personnel.getPrenom())
-                .email(personnel.getEmail())
-                .telephone(personnel.getTelephone())
-                .idPersonnel(personnel.getIdPersonnel())
+                .id(p.getIdUtilisateur())
+                .nom(p.getNom())
+                .prenom(p.getPrenom())
+                .email(p.getEmail())
+                .telephone(p.getTelephone())
+                .roleAffectation(p.getType())
                 .userType("PERSONNEL")
                 .build();
     }
 
-    private ReceptionnisteDTO convertReceptionnisteToDTO(Receptionniste receptionniste) {
+    private ReceptionnisteDTO convertReceptionnisteToDTO(Receptionniste r) {
         return ReceptionnisteDTO.builder()
-                .id(receptionniste.getIdUtilisateur())
-                .nom(receptionniste.getNom())
-                .prenom(receptionniste.getPrenom())
-                .email(receptionniste.getEmail())
-                .telephone(receptionniste.getTelephone())
-                .idReception(receptionniste.getIdReception())
+                .id(r.getIdUtilisateur())
+                .nom(r.getNom())
+                .prenom(r.getPrenom())
+                .email(r.getEmail())
+                .telephone(r.getTelephone())
                 .userType("RECEPTIONNISTE")
+                .build();
+    }
+
+    private AdminDTO convertAdminToDTO(Administrateur a) {
+        return AdminDTO.builder()
+                .id(a.getIdUtilisateur())
+                .nom(a.getNom())
+                .prenom(a.getPrenom())
+                .email(a.getEmail())
+                .telephone(a.getTelephone())
+                .userType("ADMIN")
                 .build();
     }
 }
