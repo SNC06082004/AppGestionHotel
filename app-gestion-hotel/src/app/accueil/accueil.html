@@ -8,9 +8,12 @@
     </div>
   </header>
 
+  <!-- ── Modules de navigation ── -->
   <section class="nav-container">
     <div class="nav-grid">
-      <div class="nav-card-premium" *ngFor="let module of modules" (click)="navigateTo(module.route)">
+      <div class="nav-card-premium"
+           *ngFor="let module of modules"
+           (click)="navigateTo(module.route)">
         <div class="nav-icon-wrapper">
           <span class="nav-icon">{{ module.icon }}</span>
         </div>
@@ -19,38 +22,47 @@
     </div>
   </section>
 
+  <!-- ── Catalogue des chambres ── -->
   <section class="rooms-section">
     <div class="section-header">
-      <h2>Nos Suites & Résidences</h2>
+      <h2>Nos Suites &amp; Résidences</h2>
       <div class="gold-divider"></div>
     </div>
 
     <div class="rooms-grid">
       <div class="room-card-premium" *ngFor="let room of chambres">
-        <div class="room-visual" [ngClass]="room.colorClass">
-          <span class="room-emoji">{{ room.emoji }}</span>
+         
+        <div class="room-visual">
+          <img [src]="room.image" [alt]="room.nom" class="room-img">
           <div class="room-overlay"></div>
         </div>
-        
+
         <div class="room-details">
+
           <div class="room-header">
             <h3>{{ room.nom }}</h3>
-            <span class="room-price-tag">{{ room.prixPromo | number }} CFA</span>
+            <!-- ✅ Fourchette dynamique depuis la BD -->
+            <span class="room-price-tag">{{ getFourchette(room) }}</span>
           </div>
-          
+
           <div class="amenities-tags">
             <span class="luxury-tag" *ngFor="let tag of room.tags">{{ tag }}</span>
           </div>
-          
+
+          <!-- ✅ Description conservée -->
           <p class="room-description">{{ room.description }}</p>
-          
+
           <div class="room-action">
             <div class="price-discount">
               <span class="old-price">{{ room.prixOriginal | number }} CFA</span>
               <span class="discount-pill">{{ room.remise }}</span>
             </div>
-            <button class="btn-reserve" (click)="reserverChambre(room)">Réserver</button>
+            <!-- ✅ reserverChambre passe bien roomType et roomNom -->
+            <button class="btn-reserve" (click)="reserverChambre(room)">
+              Réserver
+            </button>
           </div>
+
         </div>
       </div>
     </div>

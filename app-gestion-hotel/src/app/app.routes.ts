@@ -12,6 +12,7 @@ import { Plainte } from './plainte/plainte';
 import { Inscription } from './inscription/inscription';
 import { ConnectionC } from './connection/connection';
 import { AdminUser } from './admin-user/admin-user';
+import { GestionChambres } from './gestion-chambres/gestion-chambres';
 
 
 
@@ -27,7 +28,9 @@ export const routes: Routes = [
   { path: 'dashboard', component: Dashboard },
   { path: 'addchambre', component: Addchambre },
   { path: 'plainteetdemande', component: Plainte },
-  { path: 'adminUser', component: AdminUser }  
+  { path: 'adminUser', component: AdminUser },
+  { path: 'gestion-chambres', component: GestionChambres },
+    { path: 'reservation', component: Reservation },   
 ];
 
 

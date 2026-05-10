@@ -1,3 +1,4 @@
+
 <div class="shell">
 
   <div class="shell-header">
@@ -23,89 +24,76 @@
 
     <div class="night-badge"><span>{{ nightLabel }}</span></div>
 
-    <!-- ── Voyageurs ── -->
-    <p class="section-label">Voyageurs &amp; chambres</p>
-
-    <button class="voyageurs-btn" type="button" (click)="toggleVoyageursPanel()">
-      <div class="voy-icon">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#3C3489" stroke-width="1.5">
-          <circle cx="8" cy="5" r="3"/>
-          <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5"/>
-        </svg>
-      </div>
-      <div class="voy-text">
-        <div class="field-label">Composition</div>
-        <div class="voy-val">{{ voyageursSummary }}</div>
-      </div>
-      <span class="voy-arrow" [class.open]="showVoyageursPanel">▾</span>
-    </button>
-
-    <div class="voyageurs-panel" *ngIf="showVoyageursPanel">
-
-      <div class="counter-row">
-        <div class="counter-info">
-          <div class="c-title">Adultes</div><div class="c-sub">18 ans et plus</div>
-        </div>
-        <div class="counter-controls">
-          <button class="cbtn" type="button" (click)="decrement('adultes')" [disabled]="searchForm.adultes <= 1">−</button>
-          <span class="cval">{{ searchForm.adultes }}</span>
-          <button class="cbtn" type="button" (click)="increment('adultes')" [disabled]="searchForm.adultes >= 30">+</button>
-        </div>
-      </div>
-
-      <div class="counter-row">
-        <div class="counter-info">
-          <div class="c-title">Enfants</div><div class="c-sub">0 – 17 ans</div>
-        </div>
-        <div class="counter-controls">
-          <button class="cbtn" type="button" (click)="decrement('enfants')" [disabled]="searchForm.enfants <= 0">−</button>
-          <span class="cval">{{ searchForm.enfants }}</span>
-          <button class="cbtn" type="button" (click)="increment('enfants')" [disabled]="searchForm.enfants >= 10">+</button>
-        </div>
-      </div>
-
-      <div class="ages-enfants" *ngIf="searchForm.enfants > 0">
-        <div class="ages-grid">
-          <select
-            *ngFor="let age of searchForm.agesEnfants; let i = index"
-            [(ngModel)]="searchForm.agesEnfants[i]"
-            [class.invalid]="age === null"
-          >
-            <option [ngValue]="null" disabled>Âge requis</option>
-            <option *ngFor="let a of agesDisponibles" [ngValue]="a">
-              {{ a === 0 ? "Moins d'1 an" : a + (a === 1 ? ' an' : ' ans') }}
-            </option>
-          </select>
-        </div>
-        <p class="ages-note">L'âge de l'enfant doit correspondre à la fin du séjour.</p>
-      </div>
-
-      <div class="counter-row">
-        <div class="counter-info">
-          <div class="c-title">Chambres</div><div class="c-sub">1 chambre par groupe recommandé</div>
-        </div>
-        <div class="counter-controls">
-          <button class="cbtn" type="button" (click)="decrement('chambresNb')" [disabled]="searchForm.chambresNb <= 1">−</button>
-          <span class="cval">{{ searchForm.chambresNb }}</span>
-          <button class="cbtn" type="button" (click)="increment('chambresNb')" [disabled]="searchForm.chambresNb >= 30">+</button>
-        </div>
-      </div>
-
-      <div class="panel-divider"></div>
-
-      <div class="animal-row">
-        <div class="counter-info">
-          <div class="c-title">Animal de compagnie</div>
-          <div class="c-sub">Hors animaux d'assistance</div>
-        </div>
-        <div class="toggle" [class.on]="searchForm.avecAnimal"
-             (click)="searchForm.avecAnimal = !searchForm.avecAnimal">
-          <div class="toggle-thumb"></div>
-        </div>
-      </div>
-
-      <button class="btn-terminer" type="button" (click)="toggleVoyageursPanel()">Terminer</button>
+    <!-- Voyageurs — SANS section âges -->
+<div class="voyageurs-panel" *ngIf="showVoyageursPanel">
+  <div class="counter-row">
+    <div class="counter-info">
+      <div class="c-title">Adultes</div><div class="c-sub">18 ans et plus</div>
     </div>
+    <div class="counter-controls">
+      <button class="cbtn" (click)="decrement('adultes')" [disabled]="searchForm.adultes<=1">−</button>
+      <span class="cval">{{ searchForm.adultes }}</span>
+      <button class="cbtn" (click)="increment('adultes')" [disabled]="searchForm.adultes>=30">+</button>
+    </div>
+  </div>
+
+  <div class="counter-row">
+    <div class="counter-info">
+      <div class="c-title">Enfants</div><div class="c-sub">0 – 17 ans</div>
+    </div>
+    <div class="counter-controls">
+      <button class="cbtn" (click)="decrement('enfants')" [disabled]="searchForm.enfants<=0">−</button>
+      <span class="cval">{{ searchForm.enfants }}</span>
+      <button class="cbtn" (click)="increment('enfants')" [disabled]="searchForm.enfants>=10">+</button>
+    </div>
+  </div>
+  <!-- ❌ Section âges supprimée -->
+
+  <div class="counter-row">
+    <div class="counter-info">
+      <div class="c-title">Chambres</div>
+    </div>
+    <div class="counter-controls">
+      <button class="cbtn" (click)="decrement('chambresNb')" [disabled]="searchForm.chambresNb<=1">−</button>
+      <span class="cval">{{ searchForm.chambresNb }}</span>
+      <button class="cbtn" (click)="increment('chambresNb')" [disabled]="searchForm.chambresNb>=30">+</button>
+    </div>
+  </div>
+  <button class="btn-terminer" (click)="toggleVoyageursPanel()">Terminer</button>
+</div>
+
+<!-- ── BLOC DISPONIBILITÉ (après les dates/voyageurs) ── -->
+<button class="btn-check-dispo" (click)="checkDisponibilite()" [disabled]="dispoLoading || nights<=0">
+  {{ dispoLoading ? '⏳ Vérification...' : '🔍 Vérifier la disponibilité' }}
+</button>
+
+<!-- Résultat disponible -->
+<div class="dispo-result dispo-ok" *ngIf="dispoResult?.disponible && chambreChoisie">
+  <div class="dispo-icon">✅</div>
+  <div class="dispo-info">
+    <div class="dispo-title">Chambre disponible !</div>
+    <div class="dispo-detail">
+      Chambre N° <strong>{{ chambreChoisie.number }}</strong> ·
+      Étage {{ chambreChoisie.floor }} ·
+      {{ chambreChoisie.capacity }} pers. ·
+      <strong>{{ chambreChoisie.price | number }} FCFA/nuit</strong>
+    </div>
+  </div>
+</div>
+
+<!-- Résultat indisponible -->
+<div class="dispo-result dispo-ko" *ngIf="dispoResult && !dispoResult.disponible">
+  <div class="dispo-icon">❌</div>
+  <div class="dispo-info">
+    <div class="dispo-title">{{ dispoResult.message }}</div>
+    <div class="dispo-alternatives" *ngIf="dispoResult.capacitesAlternatives?.length > 0">
+      Capacités disponibles pour ce type :
+      <span class="alt-pill" *ngFor="let cap of dispoResult.capacitesAlternatives">
+        {{ cap }} pers.
+      </span>
+    </div>
+  </div>
+</div>
 
     <!-- ── Résumé ── -->
     <div class="summary-strip">

@@ -48,7 +48,7 @@ hotelName = 'Hôtel Paradise';
   menuItems = [
     { name: 'Tableau de bord', icon: '🏠', route: '/dashboard', active: true },
     { name: 'Utilisateurs', icon: '👥', route: '/adminUser' },
-    { name: 'Gestion des Chambres', icon: '🛏️', route: '/addchambre' },
+    { name: 'Gestion des Chambres', icon: '🛏️', route: '/gestion-chambres' },
     //{ name: 'Réservations', icon: '📅', route: '/reservations' },
     //{ name: 'Gestion des Clients', icon: '👤', route: '/adminUser' },
     { name: 'Facturation & Paiements', icon: '💳', route: '/billing' },

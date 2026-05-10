@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ChambreService } from '../services/chambre.service';
 import { PersonnelService } from '../services/personnel.service';
 import { Room, Guest, ActionEvent } from '../models/chambre.model';
-import { ClientService } from '../client.service';
+import { ClientService } from '../services/client.service';
 
 type ModalAction = null | 'cleaning' | 'maintenance' | 'guest';
 

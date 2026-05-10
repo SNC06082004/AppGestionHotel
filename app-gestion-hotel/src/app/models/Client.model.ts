@@ -35,3 +35,18 @@ export interface Client {
 // ✅ Ajouter ces exports manquants
 export interface InscriptionResponse extends AuthResponse {}
 export interface LoginResponse extends AuthResponse {}
+
+// src/app/models/client.model.ts
+// Correspond à ClientDTO.java
+
+export interface ClientDTO {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone?: string;
+  chambreActive?: string;   // numéro chambre de la résa active (null si aucune)
+  checkIn?: string;
+  checkOut?: string;
+  nombreSejours?: number;
+}

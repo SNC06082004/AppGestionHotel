@@ -1,0 +1,217 @@
+<div class="gc-page">
+
+  <!-- ── HEADER ── -->
+  <div class="gc-header">
+    <div class="gc-header-left">
+      <h1 class="gc-title">Gestion des chambres</h1>
+      <p class="gc-subtitle">{{ stats().total }} chambre{{ stats().total > 1 ? 's' : '' }} enregistrée{{ stats().total > 1 ? 's' : '' }}</p>
+    </div>
+    <button class="gc-btn-add" (click)="openCreate()">
+      <span class="gc-btn-add-icon">＋</span> Nouvelle chambre
+    </button>
+  </div>
+
+  <!-- ── MESSAGES ── -->
+  @if (successMessage) {
+    <div class="gc-alert gc-alert-success">✅ {{ successMessage }}</div>
+  }
+  @if (errorMessage) {
+    <div class="gc-alert gc-alert-error">❌ {{ errorMessage }}</div>
+  }
+
+  <!-- ── STATS PAR TYPE ── -->
+  <div class="gc-stats-row">
+    <div class="gc-stat-chip gc-stat-total">
+      <span class="gc-stat-val">{{ stats().total }}</span>
+      <span class="gc-stat-lbl">Total</span>
+    </div>
+    @for (type of roomTypes; track type.value) {
+      <div class="gc-stat-chip">
+        <span class="gc-stat-val">{{ stats().byType[type.value] || 0 }}</span>
+        <span class="gc-stat-lbl">{{ type.displayName }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- ── RECHERCHE ── -->
+  <div class="gc-search-bar">
+    <span class="gc-search-icon">🔍</span>
+    <input
+      class="gc-search-input"
+      type="text"
+      placeholder="Rechercher par numéro, type ou étage..."
+      (input)="onSearch($event)"
+    />
+  </div>
+
+  <!-- ── LISTE ── -->
+  @if (isLoading()) {
+    <div class="gc-loading">Chargement...</div>
+  } @else if (filteredRooms().length === 0) {
+    <div class="gc-empty">
+      <span class="gc-empty-icon">🏨</span>
+      <p>Aucune chambre trouvée</p>
+    </div>
+  } @else {
+    <div class="gc-table-wrapper">
+      <table class="gc-table">
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Étage</th>
+            <th>Type</th>
+            <th>Capacité</th>
+            <th>Prix / nuit</th>
+            <th>Statut</th>
+            <th>Personnel</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (room of filteredRooms(); track room.id) {
+            <tr class="gc-row">
+              <td><span class="gc-room-num">{{ room.number }}</span></td>
+              <td>Étage {{ room.floor }}</td>
+              <td>
+                <span class="gc-type-badge">{{ getTypeLabel(room.type) }}</span>
+              </td>
+              <td>{{ room.capacity }} pers.</td>
+              <td class="gc-price">{{ room.price | number }} FCFA</td>
+              <td>
+                <span class="gc-status-badge" [ngClass]="getStatusClass(room.status)">
+                  {{ getStatusLabel(room.status) }}
+                </span>
+              </td>
+              <td class="gc-staff">{{ room.staff || '—' }}</td>
+              <td class="gc-actions">
+                <button class="gc-btn-edit" (click)="openEdit(room)" title="Modifier">✏️</button>
+                <button class="gc-btn-delete" (click)="confirmDelete(room.id)" title="Supprimer">🗑️</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── MODAL FORMULAIRE ── -->
+  @if (showForm()) {
+    <div class="gc-overlay" (click)="closeForm()">
+      <div class="gc-modal" (click)="$event.stopPropagation()">
+
+        <div class="gc-modal-header">
+          <div>
+            <h2 class="gc-modal-title">
+              {{ editingRoom() ? '✏️ Modifier la chambre' : '➕ Nouvelle chambre' }}
+            </h2>
+            @if (editingRoom()) {
+              <p class="gc-modal-sub">Chambre {{ editingRoom()!.number }}</p>
+            }
+          </div>
+          <button class="gc-modal-close" (click)="closeForm()">×</button>
+        </div>
+
+        <form [formGroup]="chambreForm" (ngSubmit)="onSubmit()" class="gc-form">
+
+          <div class="gc-form-row">
+            <!-- Numéro -->
+            <div class="gc-field">
+              <label class="gc-label">Numéro <span class="gc-req">*</span></label>
+              <input class="gc-input" [class.gc-input-error]="isInvalid('number')"
+                     formControlName="number" placeholder="ex: 101"/>
+              @if (isInvalid('number')) {
+                <span class="gc-field-err">Champ requis</span>
+              }
+            </div>
+            <!-- Étage -->
+            <div class="gc-field">
+              <label class="gc-label">Étage <span class="gc-req">*</span></label>
+              <input class="gc-input" [class.gc-input-error]="isInvalid('floor')"
+                     type="number" formControlName="floor" placeholder="0" min="0"/>
+              @if (isInvalid('floor')) {
+                <span class="gc-field-err">Étage requis (min 0)</span>
+              }
+            </div>
+          </div>
+
+          <div class="gc-form-row">
+            <!-- Type -->
+            <div class="gc-field">
+              <label class="gc-label">Type <span class="gc-req">*</span></label>
+              <select class="gc-input gc-select" [class.gc-input-error]="isInvalid('type')"
+                      formControlName="type">
+                <option value="" disabled>-- Choisir un type --</option>
+                @for (t of roomTypes; track t.value) {
+                  <option [value]="t.value">{{ t.label }}</option>
+                }
+              </select>
+              @if (isInvalid('type')) {
+                <span class="gc-field-err">Type requis</span>
+              }
+            </div>
+            <!-- Capacité -->
+            <div class="gc-field">
+              <label class="gc-label">Capacité <span class="gc-req">*</span></label>
+              <input class="gc-input" [class.gc-input-error]="isInvalid('capacity')"
+                     type="number" formControlName="capacity" placeholder="1" min="1" max="20"/>
+              @if (isInvalid('capacity')) {
+                <span class="gc-field-err">Min 1 personne</span>
+              }
+            </div>
+          </div>
+
+          <!-- Prix -->
+          <div class="gc-field">
+            <label class="gc-label">Prix / nuit (FCFA) <span class="gc-req">*</span></label>
+            <input class="gc-input" [class.gc-input-error]="isInvalid('price')"
+                   type="number" formControlName="price" placeholder="0" min="1"/>
+            @if (isInvalid('price')) {
+              <span class="gc-field-err">Prix requis (min 1)</span>
+            }
+          </div>
+
+          <!-- Personnel -->
+          <div class="gc-field">
+            <label class="gc-label">Personnel assigné <span class="gc-opt">(optionnel)</span></label>
+            <input class="gc-input" formControlName="staff" placeholder="Nom du responsable..."/>
+          </div>
+
+          <!-- Notes -->
+          <div class="gc-field">
+            <label class="gc-label">Notes <span class="gc-opt">(optionnel)</span></label>
+            <textarea class="gc-input gc-textarea" formControlName="notes"
+                      placeholder="Informations complémentaires..." rows="3"></textarea>
+          </div>
+
+          <div class="gc-form-actions">
+            <button type="button" class="gc-btn-cancel" (click)="closeForm()">Annuler</button>
+            <button type="submit" class="gc-btn-submit" [disabled]="chambreForm.invalid || isSubmitting()">
+              @if (isSubmitting()) {
+                <span>⏳ Enregistrement...</span>
+              } @else {
+                <span>{{ editingRoom() ? '💾 Modifier' : '➕ Créer' }}</span>
+              }
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ── MODAL CONFIRMATION SUPPRESSION ── -->
+  @if (confirmDeleteId !== null) {
+    <div class="gc-overlay" (click)="cancelDelete()">
+      <div class="gc-confirm-modal" (click)="$event.stopPropagation()">
+        <div class="gc-confirm-icon">🗑️</div>
+        <h3 class="gc-confirm-title">Supprimer cette chambre ?</h3>
+        <p class="gc-confirm-text">Cette action est irréversible.</p>
+        <div class="gc-confirm-actions">
+          <button class="gc-btn-cancel" (click)="cancelDelete()">Annuler</button>
+          <button class="gc-btn-danger" (click)="deleteRoom()">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

@@ -1,3 +1,4 @@
+//user.model.ts
 export interface UserDTO {
   id: number;
   nom: string;

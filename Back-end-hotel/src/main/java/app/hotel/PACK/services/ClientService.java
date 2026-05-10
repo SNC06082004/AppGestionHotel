@@ -6,3 +6,4 @@ import app.hotel.PACK.DTO.InscriptionResponseDTO;
 public interface ClientService {
     InscriptionResponseDTO inscrireClient(InscriptionRequestDTO dto);
 }
+

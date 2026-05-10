@@ -25,16 +25,21 @@
     </div>
   }
 
-  <!-- Personnel assigné -->
-  @if ((room.status === 'EN_NETTOYAGE' || room.status === 'EN_MAINTENANCE') && room.staff) {
-    <div class="room-person">
-      <div class="person-name">
-        {{ room.status === 'EN_NETTOYAGE' ? '🧹' : '🔧' }} {{ room.staff }}
-      </div>
-      @if (room.notes) {
-        <div class="person-detail">{{ room.notes }}</div>
-      }
+<!-- Remplacer le bloc "Personnel assigné" par : -->
+@if ((room.status === 'EN_NETTOYAGE' || room.status === 'EN_MAINTENANCE') && room.staff) {
+  <div class="room-person">
+    <div class="person-name">
+      {{ room.status === 'EN_NETTOYAGE' ? '🧹' : '🔧' }} {{ room.staff }}
     </div>
-  }
+  </div>
+}
 
-</div>
+<!-- ✅ Ajouter : client affiché si OCCUPEE -->
+@if (room.status === 'OCCUPEE' && room.staff) {
+  <div class="room-person">
+    <div class="person-name">👤 {{ room.staff }}</div>
+    @if (room.notes) {
+      <div class="person-detail" style="font-size:0.75rem; opacity:0.7">{{ room.notes }}</div>
+    }
+  </div>
+}

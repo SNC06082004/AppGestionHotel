@@ -1,18 +1,8 @@
-export interface ComplaintRequest {
+// src/app/models/complaint.model.ts
+export interface ComplaintDTO {
+  id?: number;
   clientId: number;
-  type: 'complaint' | 'special-request';
-  priority?: string;
-  preferenceType?: string;
-  subject?: string;
-  details: string;
-  requestedDate?: string;
-  status: string;
-}
-
-export interface ComplaintResponse {
-  id?: string;
-  clientId: number;
-  clientName: string;
+  clientName?: string;
   type: 'complaint' | 'special-request';
   priority?: string;
   preferenceType?: string;
@@ -23,6 +13,10 @@ export interface ComplaintResponse {
   createdAt?: string;
   updatedAt?: string;
 }
+
+// Alias rétrocompatibles — id est maintenant number (pas string)
+export type ComplaintRequest  = Omit<ComplaintDTO, 'id' | 'clientName' | 'createdAt' | 'updatedAt'>;
+export type ComplaintResponse = ComplaintDTO;
 
 export interface Client {
   id: number;

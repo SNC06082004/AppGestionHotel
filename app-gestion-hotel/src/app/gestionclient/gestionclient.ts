@@ -1,55 +1,21 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+// src/app/components/gestionclient/gestionclient.component.ts
 
-export type TabId = 'clients' | 'plaintes' | 'speciales' | 'fidelite';
-export type Statut = 'ouverte' | 'en_cours' | 'resolue' | 'en_attente' | 'traite';
-export type Tier = 'Bronze' | 'Silver' | 'Gold';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule }      from '@angular/common';
+import { FormsModule }       from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import { catchError }   from 'rxjs/operators';
+import { ClientDTO } from '../models/Client.model';
+import { ComplaintDTO } from '../models/complaint.model';
+import { DepartDuJourDTO } from '../models/Depart.model';
+import { CarteFideliteDTO } from '../models/Fidelite.model';
+import { ClientService } from '../services/client.service';
+import { DepartService } from '../services/depart.service';
+import { FideliteService } from '../services/fidelite.service';
+import { PlaintesService } from '../services/plaintes.service';
 
-export interface Client {
-  id: string;
-  initiales: string;
-  nom: string;
-  chambre: string;
-  arrivee: string;
-  depart: string;
-  telephone: string;
-  email: string;
-  sejours: number;
-  ouvert: boolean;
-}
 
-export interface Plainte {
-  id: string;
-  clientNom: string;
-  chambre: string;
-  objet: string;
-  priorite: 'urgente' | 'normale' | 'basse';
-  date: string;
-  statut: Statut;
-}
-
-export interface DemandeSpeciale {
-  id: string;
-  clientNom: string;
-  chambre: string;
-  type: string;
-  detail: string;
-  dateSouhaitee: string;
-  statut: Statut;
-}
-
-export interface CarteFidelite {
-  clientId: string;
-  initiales: string;
-  nom: string;
-  numero: string;
-  tier: Tier;
-  points: number;
-  palierSuivant: number;
-  sejours: number;
-  membreDepuis: string;
-}
+export type TabId = 'clients' | 'plaintes' | 'speciales' | 'fidelite' | 'departs';
 
 @Component({
   selector: 'app-gestionclient',
@@ -58,152 +24,352 @@ export interface CarteFidelite {
   templateUrl: './gestionclient.html',
   styleUrl: './gestionclient.css',
 })
-export class Gestionclient {
+export class Gestionclient implements OnInit {
 
+  // ── État global ───────────────────────────────────────────────
   activeTab: TabId = 'clients';
-  searchQuery = '';
+  searchQuery      = '';
+  loading          = false;
+  errorMsg         = '';
+  today            = new Date();   // utilisé dans le template onglet Départs
 
-  // ── Données clients ──
-  clients: Client[] = [
-    { id: 'c1', initiales: 'KO', nom: 'Koné Oumar',     chambre: '204', arrivee: '2026-04-15', depart: '2026-04-18', telephone: '+226 07 11 22 33', email: 'k.oumar@mail.com',  sejours: 7, ouvert: false },
-    { id: 'c2', initiales: 'ST', nom: 'Sawadogo Tina',  chambre: '310', arrivee: '2026-04-16', depart: '2026-04-20', telephone: '+226 70 44 55 66', email: 'tina.s@mail.com',   sejours: 3, ouvert: false },
-    { id: 'c3', initiales: 'BD', nom: 'Bamba Drissa',   chambre: '105', arrivee: '2026-04-17', depart: '2026-04-19', telephone: '+226 76 88 99 00', email: 'bamba.d@mail.com',  sejours: 1, ouvert: false },
-  ];
+  // ── Données ──────────────────────────────────────────────────
+  clients:  ClientDTO[]        = [];
+  plaintes: ComplaintDTO[]     = [];
+  demandes: ComplaintDTO[]     = [];
+  cartes:   CarteFideliteDTO[] = [];
+  departs:  DepartDuJourDTO[]  = [];
 
-  // ── Plaintes ──
-  plaintes: Plainte[] = [
-    { id: 'p1', clientNom: 'Sawadogo Tina', chambre: '310', objet: 'Climatisation défectueuse', priorite: 'urgente', date: '2026-04-16', statut: 'ouverte'  },
-    { id: 'p2', clientNom: 'Koné Oumar',    chambre: '204', objet: 'Bruit dans le couloir',     priorite: 'normale', date: '2026-04-15', statut: 'en_cours' },
-    { id: 'p3', clientNom: 'Traoré Ali',    chambre: '118', objet: 'Serviettes insuffisantes',  priorite: 'basse',   date: '2026-04-14', statut: 'resolue'  },
-  ];
+  // ── État d'expansion des lignes clients ──────────────────────
+  clientsOuverts = new Set<number>();
 
-  nouvellePlainte = { clientNom: '', priorite: 'normale', objet: '', description: '' };
+  // ── Formulaire nouvelle plainte ──────────────────────────────
+  nouvellePlainte: Partial<ComplaintDTO> = {
+    clientId:  0,
+    type:      'complaint',
+    priority:  'Normale',
+    subject:   '',
+    details:   '',
+    status:    'En attente',
+  };
 
-  // ── Demandes spéciales ──
-  demandes: DemandeSpeciale[] = [
-    { id: 'd1', clientNom: 'Koné Oumar',   chambre: '204', type: 'Préférence alimentaire', detail: 'Repas végétarien au dîner', dateSouhaitee: '2026-04-15', statut: 'traite'    },
-    { id: 'd2', clientNom: 'Yara Fatou',   chambre: '212', type: 'Accessibilité',           detail: 'Lit bébé en chambre',      dateSouhaitee: '2026-04-17', statut: 'en_cours'  },
-    { id: 'd3', clientNom: 'Bamba Drissa', chambre: '105', type: 'Transport',               detail: 'Transfert aéroport',       dateSouhaitee: '2026-04-19', statut: 'en_attente'},
-  ];
+  // ── Formulaire nouvelle demande spéciale ─────────────────────
+  nouvelleDemande: Partial<ComplaintDTO> = {
+    clientId:       0,
+    type:           'special-request',
+    preferenceType: 'Préférence alimentaire',
+    details:        '',
+    requestedDate:  '',
+    status:         'En attente',
+  };
 
-  nouvelleDemande = { clientNom: '', type: 'Préférence alimentaire', detail: '', dateSouhaitee: '', statut: 'en_attente' };
+  // ── Formulaire ajout de points ───────────────────────────────
+  ajoutPoints = { clientId: 0, points: 0 };
 
-  // ── Fidélité ──
-  cartes: CarteFidelite[] = [
-    { clientId: 'c1', initiales: 'KO', nom: 'Koné Oumar',    numero: 'LXR-0042', tier: 'Gold',   points: 1250, palierSuivant: 1500, sejours: 7, membreDepuis: 'janv. 2023' },
-    { clientId: 'c2', initiales: 'ST', nom: 'Sawadogo Tina', numero: 'LXR-0089', tier: 'Silver', points: 480,  palierSuivant: 750,  sejours: 3, membreDepuis: 'oct. 2024'  },
-    { clientId: 'c3', initiales: 'BD', nom: 'Bamba Drissa',  numero: 'LXR-0112', tier: 'Bronze', points: 75,   palierSuivant: 250,  sejours: 1, membreDepuis: 'avr. 2026'  },
-  ];
+  // ── Feedback inline ──────────────────────────────────────────
+  feedbackMsg  = '';
+  feedbackType: 'success' | 'error' = 'success';
 
-  ajoutPoints = { clientNom: '', points: 0, motif: 'Séjour complété', date: '' };
+  // ── Injection ────────────────────────────────────────────────
+  constructor(
+    private clientService:  ClientService,
+    private plaintesService: PlaintesService,
+    private fideliteService: FideliteService,
+    private departService:   DepartService,
+  ) {}
 
-  // ── Stats ──
-  get totalClients()   { return 48; }
-  get plaintesOuvertes(){ return this.plaintes.filter(p => p.statut === 'ouverte').length; }
-  get demandesAttente(){ return this.demandes.filter(d => d.statut === 'en_attente').length; }
-  get totalFidelite()  { return this.cartes.length; }
+  // ── Initialisation ───────────────────────────────────────────
+  ngOnInit(): void {
+    this.chargerTout();
+  }
 
-  // ── Navigation ──
-  switchTab(tab: TabId): void { this.activeTab = tab; }
+  chargerTout(): void {
+    this.loading = true;
 
-  // ── Clients ──
-  get clientsFiltres(): Client[] {
+    forkJoin({
+      clients:  this.clientService.getAllClients().pipe(
+                  catchError(err => { console.warn('clients:', err.status); return of([]); })
+                ),
+      plaintes: this.plaintesService.getPlaintes().pipe(
+                  catchError(err => { console.warn('plaintes:', err.status); return of([]); })
+                ),
+      cartes:   this.fideliteService.getAllCartes().pipe(
+                  catchError(err => { console.warn('fidelite:', err.status); return of([]); })
+                ),
+      departs:  this.departService.getDepartsDuJour().pipe(
+                  catchError(err => { console.warn('departs:', err.status); return of([]); })
+                ),
+    }).subscribe(({ clients, plaintes, cartes, departs }) => {
+      this.clients = clients as ClientDTO[];
+      const all = plaintes as unknown as ComplaintDTO[];
+      this.plaintes = all.filter(p => p.type === 'complaint');
+      this.demandes = all.filter(p => p.type === 'special-request');
+      this.cartes  = cartes  as CarteFideliteDTO[];
+      this.departs = departs as DepartDuJourDTO[];
+      this.loading = false;
+    });
+  }
+
+  // ── Navigation ───────────────────────────────────────────────
+  switchTab(tab: TabId): void {
+    this.activeTab = tab;
+    this.feedbackMsg = '';
+  }
+
+  // ── Stats ────────────────────────────────────────────────────
+  get totalClients():      number { return this.clients.length; }
+  get plaintesOuvertes(): number {
+    return this.plaintes.filter(p => p.status === 'En attente' || p.status === 'En cours').length;
+  }
+  get demandesAttente():  number {
+    return this.demandes.filter(d => d.status === 'En attente').length;
+  }
+  get totalFidelite():    number { return this.cartes.length; }
+  get departsDuJour():    number { return this.departs.filter(d => !d.departEffectue).length; }
+
+  // ── Clients ──────────────────────────────────────────────────
+  get clientsFiltres(): ClientDTO[] {
     const q = this.searchQuery.toLowerCase();
-    return q ? this.clients.filter(c => c.nom.toLowerCase().includes(q)) : this.clients;
+    if (!q) return this.clients;
+    return this.clients.filter(c =>
+      (`${c.prenom} ${c.nom}`).toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q)
+    );
   }
 
-  toggleClient(client: Client): void {
-    this.clients.forEach(c => { if (c !== client) c.ouvert = false; });
-    client.ouvert = !client.ouvert;
+  toggleClient(client: ClientDTO): void {
+    if (this.clientsOuverts.has(client.id)) {
+      this.clientsOuverts.delete(client.id);
+    } else {
+      this.clientsOuverts.clear();
+      this.clientsOuverts.add(client.id);
+    }
   }
 
-  getBadgesClient(client: Client): string[] {
+  isClientOuvert(client: ClientDTO): boolean {
+    return this.clientsOuverts.has(client.id);
+  }
+
+  initialesClient(client: ClientDTO): string {
+    return (
+      (client.prenom?.charAt(0) ?? '') +
+      (client.nom?.charAt(0)    ?? '')
+    ).toUpperCase();
+  }
+
+  nomComplet(client: ClientDTO): string {
+    return `${client.prenom} ${client.nom}`;
+  }
+
+  getBadgesClient(client: ClientDTO): string[] {
     const badges: string[] = [];
     const carte = this.cartes.find(c => c.clientId === client.id);
     if (carte) badges.push(carte.tier);
-    if (this.plaintes.some(p => p.clientNom === client.nom && p.statut === 'ouverte')) badges.push('Plainte');
-    if (this.demandes.some(d => d.clientNom === client.nom && d.statut !== 'traite')) badges.push('Demande');
+    if (this.plaintes.some(p =>
+      p.clientId === client.id &&
+      (p.status === 'En attente' || p.status === 'En cours')
+    )) badges.push('Plainte');
+    if (this.demandes.some(d =>
+      d.clientId === client.id && d.status !== 'Résolue'
+    )) badges.push('Demande');
     return badges;
   }
 
   badgeClass(badge: string): string {
-    if (badge === 'Gold' || badge === 'Silver' || badge === 'Bronze') return 'badge-fid';
-    if (badge === 'Plainte') return 'badge-plainte';
-    if (badge === 'Demande') return 'badge-special';
+    if (['GOLD','SILVER','BRONZE','PLATINUM'].includes(badge)) return 'badge-fid';
+    if (badge === 'Plainte')  return 'badge-plainte';
+    if (badge === 'Demande')  return 'badge-special';
     return 'badge-ok';
   }
 
-  getPointsClient(clientId: string): number {
+  getPointsClient(clientId: number): number {
     return this.cartes.find(c => c.clientId === clientId)?.points ?? 0;
   }
 
-  // ── Plaintes ──
-  statutLabel(s: Statut): string {
-    const map: Record<Statut, string> = { ouverte: 'Ouverte', en_cours: 'En cours', resolue: 'Résolue', en_attente: 'En attente', traite: 'Traité' };
-    return map[s];
-  }
-
-  statutClass(s: Statut): string {
-    if (s === 'ouverte' || s === 'en_attente') return 'st-open';
-    if (s === 'en_cours') return 'st-progress';
-    return 'st-done';
-  }
-
-  dotClass(s: Statut): string {
-    if (s === 'ouverte') return 'dot-red';
-    if (s === 'en_cours' || s === 'en_attente') return 'dot-amber';
-    if (s === 'traite' || s === 'resolue') return 'dot-green';
-    return 'dot-purple';
-  }
-
+  // ── Plaintes ─────────────────────────────────────────────────
   ajouterPlainte(): void {
-    if (!this.nouvellePlainte.clientNom || !this.nouvellePlainte.objet) return;
-    const client = this.clients.find(c => c.nom === this.nouvellePlainte.clientNom);
-    this.plaintes.unshift({
-      id: 'p' + Date.now(),
-      clientNom: this.nouvellePlainte.clientNom,
-      chambre: client?.chambre ?? '—',
-      objet: this.nouvellePlainte.objet,
-      priorite: this.nouvellePlainte.priorite as any,
-      date: new Date().toISOString().split('T')[0],
-      statut: 'ouverte'
+    const { clientId, subject, details, priority } = this.nouvellePlainte;
+    if (!clientId || !subject || !details) {
+      this.showFeedback('Veuillez remplir tous les champs obligatoires.', 'error');
+      return;
+    }
+
+    const payload: ComplaintDTO = {
+      clientId:  clientId!,
+      type:      'complaint',
+      priority:  priority ?? 'Normale',
+      subject:   subject,
+      details:   details!,
+      status:    'En attente',
+    };
+
+    this.plaintesService.createPlainte(payload).subscribe({
+      next: created => {
+        this.plaintes.unshift(created as unknown as ComplaintDTO);
+        this.resetFormPlainte();
+        this.showFeedback('Plainte enregistrée avec succès.', 'success');
+      },
+      error: () => this.showFeedback('Erreur lors de l\'enregistrement.', 'error'),
     });
-    this.nouvellePlainte = { clientNom: '', priorite: 'normale', objet: '', description: '' };
   }
 
-  // ── Demandes spéciales ──
+  changerStatutPlainte(plainte: ComplaintDTO, statut: string): void {
+    if (!plainte.id) return;
+    this.plaintesService.updatePlainte(plainte.id, { ...plainte, status: statut })
+      .subscribe({
+        next: updated => {
+          const idx = this.plaintes.findIndex(p => p.id === updated.id);
+          if (idx !== -1) this.plaintes[idx] = updated as unknown as ComplaintDTO;
+        },
+        error: () => this.showFeedback('Erreur lors de la mise à jour.', 'error'),
+      });
+  }
+
+  // ── Demandes spéciales ───────────────────────────────────────
   ajouterDemande(): void {
-    if (!this.nouvelleDemande.clientNom || !this.nouvelleDemande.detail) return;
-    const client = this.clients.find(c => c.nom === this.nouvelleDemande.clientNom);
-    this.demandes.unshift({
-      id: 'd' + Date.now(),
-      clientNom: this.nouvelleDemande.clientNom,
-      chambre: client?.chambre ?? '—',
-      type: this.nouvelleDemande.type,
-      detail: this.nouvelleDemande.detail,
-      dateSouhaitee: this.nouvelleDemande.dateSouhaitee,
-      statut: 'en_attente'
+    const { clientId, preferenceType, details, requestedDate } = this.nouvelleDemande;
+    if (!clientId || !details) {
+      this.showFeedback('Veuillez remplir tous les champs obligatoires.', 'error');
+      return;
+    }
+
+    const payload: ComplaintDTO = {
+      clientId:       clientId!,
+      type:           'special-request',
+      preferenceType: preferenceType ?? 'Autre',
+      details:        details!,
+      requestedDate:  requestedDate,
+      status:         'En attente',
+    };
+
+    this.plaintesService.createPlainte(payload).subscribe({
+      next: created => {
+        this.demandes.unshift(created as unknown as ComplaintDTO);
+        this.resetFormDemande();
+        this.showFeedback('Demande enregistrée avec succès.', 'success');
+      },
+      error: () => this.showFeedback('Erreur lors de l\'enregistrement.', 'error'),
     });
-    this.nouvelleDemande = { clientNom: '', type: 'Préférence alimentaire', detail: '', dateSouhaitee: '', statut: 'en_attente' };
   }
 
-  // ── Fidélité ──
-  progression(carte: CarteFidelite): number {
-    return Math.round((carte.points / carte.palierSuivant) * 100);
+  changerStatutDemande(demande: ComplaintDTO, statut: string): void {
+    if (!demande.id) return;
+    this.plaintesService.updatePlainte(demande.id, { ...demande, status: statut })
+      .subscribe({
+        next: updated => {
+          const idx = this.demandes.findIndex(d => d.id === updated.id);
+          if (idx !== -1) this.demandes[idx] = updated as unknown as ComplaintDTO;
+        },
+        error: () => this.showFeedback('Erreur lors de la mise à jour.', 'error'),
+      });
   }
 
-  tierClass(tier: Tier): string {
-    const map: Record<Tier, string> = { Bronze: 'tier-bronze', Silver: 'tier-silver', Gold: 'tier-gold' };
-    return map[tier];
+  // ── Fidélité ─────────────────────────────────────────────────
+  progression(carte: CarteFideliteDTO): number {
+    if (carte.tier === 'PLATINUM') return 100;
+    return Math.min(100, Math.round((carte.points / carte.palierSuivant) * 100));
+  }
+
+  tierClass(tier: string): string {
+    const map: Record<string, string> = {
+      BRONZE: 'tier-bronze', SILVER: 'tier-silver',
+      GOLD: 'tier-gold',     PLATINUM: 'tier-platinum',
+    };
+    return map[tier] ?? '';
   }
 
   attribuerPoints(): void {
-    if (!this.ajoutPoints.clientNom || !this.ajoutPoints.points) return;
-    const nom = this.ajoutPoints.clientNom.split(' — ')[0];
-    const carte = this.cartes.find(c => c.nom === nom);
-    if (carte) carte.points += Number(this.ajoutPoints.points);
-    this.ajoutPoints = { clientNom: '', points: 0, motif: 'Séjour complété', date: '' };
+    const { clientId, points } = this.ajoutPoints;
+    if (!clientId || points <= 0) {
+      this.showFeedback('Sélectionner un client et entrer un nombre de points valide.', 'error');
+      return;
+    }
+
+    this.fideliteService.ajouterPoints(clientId, points).subscribe({
+      next: updated => {
+        const idx = this.cartes.findIndex(c => c.clientId === updated.clientId);
+        if (idx !== -1) this.cartes[idx] = updated;
+        else this.cartes.push(updated);
+        this.ajoutPoints = { clientId: 0, points: 0 };
+        this.showFeedback(`${points} points ajoutés avec succès.`, 'success');
+      },
+      error: () => this.showFeedback('Erreur lors de l\'attribution des points.', 'error'),
+    });
   }
 
-  nomsClients(): string[] { return this.clients.map(c => c.nom); }
+  // ── Départs du jour ──────────────────────────────────────────
+  marquerDepart(depart: DepartDuJourDTO): void {
+    this.departService.marquerDepartEffectue(depart.reservationId).subscribe({
+      next: updated => {
+        const idx = this.departs.findIndex(d => d.reservationId === updated.reservationId);
+        if (idx !== -1) this.departs[idx] = updated;
+        // Rafraîchir les cartes fidélité (points mis à jour côté serveur)
+        this.fideliteService.getAllCartes().subscribe(cartes => this.cartes = cartes);
+        this.showFeedback(
+          `Départ de ${updated.clientNom} enregistré. Chambre ${updated.numeroChambre} en nettoyage.`,
+          'success'
+        );
+      },
+      error: () => this.showFeedback('Erreur lors de l\'enregistrement du départ.', 'error'),
+    });
+  }
+
+  statutChambreLabel(statut: string): string {
+    const map: Record<string, string> = {
+      DISPONIBLE:     'Disponible',
+      OCCUPEE:        'Occupée',
+      EN_NETTOYAGE:   'En nettoyage',
+      EN_MAINTENANCE: 'En maintenance',
+      RESERVEE:       'Réservée',
+    };
+    return map[statut] ?? statut;
+  }
+
+  // ── Helpers label / class partagés ───────────────────────────
+  statutLabel(s: string): string {
+    const map: Record<string, string> = {
+      'En attente': 'En attente',
+      'En cours':   'En cours',
+      'Résolue':    'Résolue',
+    };
+    return map[s] ?? s;
+  }
+
+  statutClass(s: string): string {
+    if (s === 'En attente') return 'st-open';
+    if (s === 'En cours')   return 'st-progress';
+    return 'st-done';
+  }
+
+  dotClass(s: string): string {
+    if (s === 'En attente') return 'dot-red';
+    if (s === 'En cours')   return 'dot-amber';
+    return 'dot-green';
+  }
+
+  // ── Utilitaires ──────────────────────────────────────────────
+  nomsClients(): ClientDTO[] {
+    return this.clients;
+  }
+
+  private resetFormPlainte(): void {
+    this.nouvellePlainte = {
+      clientId: 0, type: 'complaint',
+      priority: 'Normale', subject: '', details: '', status: 'En attente',
+    };
+  }
+
+  private resetFormDemande(): void {
+    this.nouvelleDemande = {
+      clientId: 0, type: 'special-request',
+      preferenceType: 'Préférence alimentaire',
+      details: '', requestedDate: '', status: 'En attente',
+    };
+  }
+
+  private showFeedback(msg: string, type: 'success' | 'error'): void {
+    this.feedbackMsg  = msg;
+    this.feedbackType = type;
+    setTimeout(() => this.feedbackMsg = '', 4000);
+  }
 }

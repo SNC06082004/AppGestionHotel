@@ -37,7 +37,10 @@ public class SecurityConfig {
             		.requestMatchers("/api/admin/**").permitAll()
             	    .requestMatchers("/api/auth/**").permitAll()
             	    .requestMatchers("/api/clients/**").permitAll()
+            	    .requestMatchers("/api/reservations/**").permitAll()
             	    
+            	    .requestMatchers("/api/fidelite/**").authenticated()
+            	    .requestMatchers("/api/departs/**").authenticated()
             	    .requestMatchers("/api/chambres/**").authenticated()
             	    .requestMatchers("/api/personnel/**").authenticated()
             	    .requestMatchers("/api/complaints/**").authenticated()
@@ -64,3 +67,4 @@ public class SecurityConfig {
         return source;
     }
 }
+

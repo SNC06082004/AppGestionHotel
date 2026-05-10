@@ -1,18 +1,19 @@
 :host {
-  /* Nouvelle palette : Gris Anthracite & Or */
-  --bg-gradient: linear-gradient(135deg, #2d3436 0%, #1e272e 100%);
-  --surface-light: #353b48;
-  --surface-card: #2f3640;
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --gold: #eeba0f;
-  --text-main: #f5f6fa;
-  --text-dim: #aeb9cc;
-  --transition: all 0.3s ease-out;
+  display: block; /* Très important pour que le composant occupe l'espace */
+  width: 100%;
 }
 
 .accueil-wrapper {
+  width: 100%;
   min-height: 100vh;
-  background: var(--bg-gradient);
+  /* On utilise le chemin relatif au serveur */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                    url("/acceuilIMG.jpeg") !important;
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  
   color: var(--text-main);
   padding: 2rem 5%;
 }
@@ -77,12 +78,24 @@
   gap: 2rem;
 }
 
-.room-card-premium {
-  background: var(--surface-card);
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  transition: var(--transition);
+.room-card-premium:hover .room-img {
+  transform: scale(1.1); /* Petit effet de zoom au survol très élégant */
+}
+
+.room-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));
+  pointer-events: none; /* Laisse passer les clics */
+}
+.room-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Garde les proportions en remplissant tout le cadre */
+  transition: transform 0.5s ease;
 }
 
 .room-card-premium:hover {
@@ -91,12 +104,10 @@
 }
 
 .room-visual {
-  height: 160px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3.5rem;
-  background: rgba(255, 255, 255, 0.05);
+  height: 200px; /* On peut l'agrandir un peu pour mieux voir l'image */
+  position: relative;
+  overflow: hidden;
+  display: block; /* On retire le flex qui servait à centrer l'emoji */
 }
 
 .room-details { padding: 1.5rem; }
