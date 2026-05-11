@@ -1,4 +1,10 @@
-<div class="room-card" [ngClass]="room.status" (click)="onClick()">
+<div
+  class="room-card"
+  [ngClass]="room.status"
+  [class.room-card--readonly]="readOnly"
+  [attr.title]="readOnly ? 'Consulter le détail (lecture seule)' : null"
+  (click)="onClick()"
+>
 
   <div class="room-header">
     <div class="room-number">{{ room.number }}</div>

@@ -290,3 +290,14 @@
 
 .selected-client-name { font-weight: 600; color: #52b788; }
 .selected-client-info { font-size: 0.8rem; color: #74c69d; margin-top: 2px; }
+
+.modal-readonly-notice {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted, #94a3b8);
+  background: rgba(148, 163, 184, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}

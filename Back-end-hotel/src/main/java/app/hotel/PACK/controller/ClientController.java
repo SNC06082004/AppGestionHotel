@@ -8,6 +8,7 @@ import app.hotel.PACK.repository.ClientRepository;
 import app.hotel.PACK.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ public class ClientController {
 
     /** GET /api/clients — tous les clients avec leur chambre active */
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<List<ClientDTO>> getAllClients() {
         LocalDate today = LocalDate.now();
 

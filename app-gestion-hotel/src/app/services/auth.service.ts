@@ -21,10 +21,56 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
+  /** Rôle métier attendu par RoleGuard / navbar (ADMIN, CLIENT, …). */
+  getAppRole(user: any): string | null {
+    if (!user || typeof user !== 'object') return null;
+    let r = user.userType ?? user.role;
+    if (typeof r !== 'string') return null;
+    const t = r.trim();
+    if (!t) return null;
+    return t.startsWith('ROLE_') ? t.slice(5) : t;
+  }
+
+  private readRoleFromJwt(token: string): string | null {
+    try {
+      let base64 = token.split('.')[1];
+      if (!base64) return null;
+      base64 = base64.replace(/-/g, '+').replace(/_/g, '/');
+      const pad = base64.length % 4;
+      if (pad) base64 += '='.repeat(4 - pad);
+      const payload = JSON.parse(atob(base64));
+      const r = payload.role;
+      if (typeof r !== 'string') return null;
+      return r.startsWith('ROLE_') ? r.slice(5) : r;
+    } catch {
+      return null;
+    }
+  }
+
+  private normalizeUserPayload(raw: any): any {
+    if (!raw || typeof raw !== 'object') return raw;
+    let role = this.getAppRole(raw);
+    if (!role) {
+      const token = localStorage.getItem('token');
+      if (token) role = this.readRoleFromJwt(token);
+    }
+    return role ? { ...raw, userType: role } : { ...raw };
+  }
+
   // Récupérer l'utilisateur stocké dans localStorage
   private getUserFromStorage(): any {
     const user = localStorage.getItem('currentUser');
-    return user ? JSON.parse(user) : null;
+    if (!user) return null;
+    try {
+      const parsed = JSON.parse(user);
+      const normalized = this.normalizeUserPayload(parsed);
+      if (normalized?.userType && normalized.userType !== parsed?.userType) {
+        localStorage.setItem('currentUser', JSON.stringify(normalized));
+      }
+      return normalized;
+    } catch {
+      return null;
+    }
   }
 
   // Inscription
@@ -41,8 +87,9 @@ export class AuthService {
     ).pipe(
       tap((response: AuthResponse) => {
         localStorage.setItem('token', response.token);
-        localStorage.setItem('currentUser', JSON.stringify(response.user));
-        this.currentUserSubject.next(response.user);
+        const user = this.normalizeUserPayload(response.user);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
       })
     );
   }
@@ -55,8 +102,9 @@ export class AuthService {
     ).pipe(
       tap((response: AuthResponse) => {
         localStorage.setItem('token', response.token);
-        localStorage.setItem('currentUser', JSON.stringify(response.user));
-        this.currentUserSubject.next(response.user);
+        const user = this.normalizeUserPayload(response.user);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
       })
     );
   }
@@ -70,7 +118,18 @@ export class AuthService {
 
   // Récupérer l'utilisateur actuellement connecté
   getCurrentUser(): any {
-    return this.currentUserSubject.value;
+    const u = this.currentUserSubject.value;
+    if (!u) return null;
+    const role = this.getAppRole(u);
+    if (!role && this.getToken()) {
+      const fixed = this.normalizeUserPayload(u);
+      if (fixed?.userType) {
+        localStorage.setItem('currentUser', JSON.stringify(fixed));
+        this.currentUserSubject.next(fixed);
+        return fixed;
+      }
+    }
+    return u;
   }
 
   // Récupérer le token

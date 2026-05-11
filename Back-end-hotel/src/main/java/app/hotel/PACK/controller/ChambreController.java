@@ -26,7 +26,7 @@ public class ChambreController {
     // ────── CRUD BASIQUE ──────
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER', 'PERSONNEL')")
     public ResponseEntity<List<ChambreDTO>> getAllChambres() {
         log.info("📋 GET /api/chambres");
         List<ChambreDTO> chambres = chambreService.getAllChambres();
@@ -34,7 +34,7 @@ public class ChambreController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER', 'TECHNICIEN', 'FEMME_DE_CHAMBRE')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER', 'PERSONNEL', 'TECHNICIEN', 'FEMME_DE_CHAMBRE')")
     public ResponseEntity<ChambreDTO> getChambreById(@PathVariable Integer id) {
         log.info("🔍 GET /api/chambres/{}", id);
         return chambreService.getChambreById(id)
@@ -86,7 +86,7 @@ public class ChambreController {
     // ────── FILTRAGE ──────
 
     @GetMapping("/by-status/{status}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER', 'PERSONNEL')")
     public ResponseEntity<List<ChambreDTO>> getByStatus(@PathVariable String status) {
         log.info("🔍 GET /api/chambres/by-status/{}", status);
         try {
@@ -100,7 +100,7 @@ public class ChambreController {
     }
 
     @GetMapping("/by-type/{type}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER', 'PERSONNEL')")
     public ResponseEntity<List<ChambreDTO>> getByType(@PathVariable String type) {
         log.info("🔍 GET /api/chambres/by-type/{}", type);
         try {
@@ -114,7 +114,7 @@ public class ChambreController {
     }
 
     @GetMapping("/by-floor/{floor}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE', 'MANAGER', 'PERSONNEL')")
     public ResponseEntity<List<ChambreDTO>> getByFloor(@PathVariable Integer floor) {
         log.info("🔍 GET /api/chambres/by-floor/{}", floor);
         List<ChambreDTO> chambres = chambreService.getChambresByFloor(floor);

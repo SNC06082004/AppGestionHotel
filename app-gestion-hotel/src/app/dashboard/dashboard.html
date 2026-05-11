@@ -16,6 +16,9 @@
         <p class="page-sub">
           {{ filteredCount }} chambre{{ filteredCount > 1 ? 's' : '' }} · Étages 1 à 3
         </p>
+        @if (personnelReadOnly) {
+          <p class="read-only-banner">Consultation seule — aucune modification n’est possible.</p>
+        }
       </div>
 
       <div class="filters">
@@ -46,6 +49,7 @@
             @for (room of roomsByFloor(floor); track room.id) {
               <app-roomcard
                 [room]="room"
+                [readOnly]="personnelReadOnly"
                 (cardClick)="openModal($event)"
               />
             }
@@ -61,6 +65,7 @@
 @if (selectedRoom()) {
   <app-roommodal
     [room]="selectedRoom()!"
+    [readOnly]="personnelReadOnly"
     (close)="closeModal()"
     (actionDone)="onActionDone($event)"
   />

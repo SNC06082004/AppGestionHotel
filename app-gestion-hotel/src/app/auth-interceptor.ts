@@ -21,29 +21,22 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authService.getToken();
+    const url = request.url;
+    const isAuthPublicEndpoint =
+      url.includes('/auth/login') || url.includes('/auth/register');
 
-    console.log('🔐 [AuthInterceptor] Token:', token ? 'Présent ✅' : 'Absent ❌');
-    console.log('🔗 [AuthInterceptor] URL:', request.url);
-
-    // Ajouter le token si disponible
-    if (token) {
+    // Ne pas envoyer un ancien JWT sur login/register (évite 401 « session » et boucles)
+    if (token && !isAuthPublicEndpoint) {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
         }
       });
-      console.log('✅ [AuthInterceptor] Token ajouté au header');
-    } else {
-      console.warn('⚠️ [AuthInterceptor] Pas de token disponible');
     }
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        console.error('❌ [AuthInterceptor] Erreur HTTP:', error.status, error.message);
-        
-        if (error.status === 401) {
-          // Token expiré ou invalide
-          console.warn('🔄 [AuthInterceptor] Token expiré. Déconnexion...');
+        if (error.status === 401 && !isAuthPublicEndpoint) {
           this.authService.logout();
           this.router.navigate(['/connexion']);
         }

@@ -16,6 +16,8 @@ type ModalAction = null | 'cleaning' | 'maintenance' | 'guest';
 })
 export class Roommodal implements OnInit {
   @Input({ required: true }) room!: Room;
+  /** Consultation seule : pas d’API ni de boutons d’action (ex. rôle Personnel). */
+  @Input() readOnly = false;
   @Output() close = new EventEmitter<void>();
   @Output() actionDone = new EventEmitter<ActionEvent>();
 
@@ -46,6 +48,7 @@ export class Roommodal implements OnInit {
   private clientService = inject(ClientService); // ✅ Ajouter
 
   ngOnInit(): void {
+    if (this.readOnly) return;
     this.loadPersonnel();
     this.loadClients();
   }
@@ -114,6 +117,7 @@ export class Roommodal implements OnInit {
   }
 
   get actionTitle(): string {
+    if (this.readOnly) return 'Détail chambre';
     const map: Record<string, string> = {
       cleaning: 'Affecter – Nettoyage',
       maintenance: 'Affecter – Maintenance',
@@ -124,6 +128,7 @@ export class Roommodal implements OnInit {
   }
 
   setAction(a: ModalAction): void {
+  if (this.readOnly) return;
   this.selectedCleaningStaff = '';
   this.selectedMaintenanceStaff = '';
   this.maintenanceNotes = '';

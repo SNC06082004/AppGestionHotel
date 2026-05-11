@@ -5,6 +5,7 @@ import app.hotel.PACK.services.ComplaintService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -20,6 +21,7 @@ public class ComplaintController {
     private final ComplaintService complaintService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('CLIENT', 'ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<ComplaintDTO> createComplaint(@Valid @RequestBody ComplaintDTO complaintDTO) {
         try {
             ComplaintDTO created = complaintService.createComplaint(complaintDTO);
@@ -30,12 +32,14 @@ public class ComplaintController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<List<ComplaintDTO>> getAllComplaints() {
         List<ComplaintDTO> complaints = complaintService.getAllComplaints();
         return ResponseEntity.ok(complaints);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<ComplaintDTO> getComplaintById(@PathVariable Integer id) {
         Optional<ComplaintDTO> complaint = complaintService.getComplaintById(id);
         return complaint.map(ResponseEntity::ok)
@@ -43,18 +47,21 @@ public class ComplaintController {
     }
 
     @GetMapping("/client/{clientId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<List<ComplaintDTO>> getComplaintsByClient(@PathVariable Integer clientId) {
         List<ComplaintDTO> complaints = complaintService.getComplaintsByClientId(clientId);
         return ResponseEntity.ok(complaints);
     }
 
     @GetMapping("/type/{type}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<List<ComplaintDTO>> getComplaintsByType(@PathVariable String type) {
         List<ComplaintDTO> complaints = complaintService.getComplaintsByType(type);
         return ResponseEntity.ok(complaints);
     }
 
     @GetMapping("/client/{clientId}/type/{type}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<List<ComplaintDTO>> getComplaintsByClientAndType(
             @PathVariable Integer clientId,
             @PathVariable String type) {
@@ -63,12 +70,14 @@ public class ComplaintController {
     }
 
     @GetMapping("/status/{status}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<List<ComplaintDTO>> getComplaintsByStatus(@PathVariable String status) {
         List<ComplaintDTO> complaints = complaintService.getComplaintsByStatus(status);
         return ResponseEntity.ok(complaints);
     }
 
     @GetMapping("/priority/{priority}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<List<ComplaintDTO>> getComplaintsByPriority(@PathVariable String priority) {
         List<ComplaintDTO> complaints = complaintService.getComplaintsByPriority(priority);
         return ResponseEntity.ok(complaints);
@@ -78,6 +87,7 @@ public class ComplaintController {
      * Mettre à jour une plainte ou demande
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<ComplaintDTO> updateComplaint(
             @PathVariable Integer id,  // ✅ CORRIGÉ: Integer au lieu de String
             @Valid @RequestBody ComplaintDTO complaintDTO) {
@@ -93,6 +103,7 @@ public class ComplaintController {
      * Changer le statut d'une plainte/demande
      */
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<ComplaintDTO> updateStatus(
             @PathVariable Integer id,
             @RequestParam String status) {
@@ -108,6 +119,7 @@ public class ComplaintController {
      * Supprimer une plainte/demande
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECEPTIONNISTE')")
     public ResponseEntity<Void> deleteComplaint(@PathVariable Integer id) {
         try {
             complaintService.deleteComplaint(id);

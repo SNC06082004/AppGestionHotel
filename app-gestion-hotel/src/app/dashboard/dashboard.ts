@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChambreService } from '../services/chambre.service';
+import { AuthService } from '../services/auth.service';
 import { Sidebar } from '../sidebar/sidebar';
 import { Roomcard } from '../room-card/roomcard';
 import { Roommodal } from '../room-modal/roommodal';
@@ -25,6 +26,12 @@ interface FilterOption {
 })
 export class Dashboard {
   private roomService = inject(ChambreService);
+  private authService = inject(AuthService);
+
+  /** Personnel : consultation du plan des chambres, sans aucune modification. */
+  get personnelReadOnly(): boolean {
+    return this.authService.getAppRole(this.authService.getCurrentUser()) === 'PERSONNEL';
+  }
 
   currentFilter = signal<RoomStatus | 'all'>('all');
   selectedRoom = signal<Room | null>(null);

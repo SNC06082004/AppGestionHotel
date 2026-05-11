@@ -15,6 +15,10 @@
     <!-- ── CORPS ── -->
     <div class="modal-body">
 
+      @if (readOnly) {
+        <p class="modal-readonly-notice">Consultation seule — vous pouvez consulter les informations, pas les modifier.</p>
+      }
+
       @if (action() === null) {
 
         <div class="current-status">
@@ -36,9 +40,11 @@
               → {{ room.guest.checkOut | date:'dd MMM yyyy' : '' : 'fr-FR' }}
             </div>
           </div>
-          <button class="btn btn-danger" (click)="doCheckout()">
-            ⬆️ Check-out client
-          </button>
+          @if (!readOnly) {
+            <button class="btn btn-danger" (click)="doCheckout()">
+              ⬆️ Check-out client
+            </button>
+          }
         }
 
         <!-- Fiche personnel assigné -->
@@ -49,17 +55,21 @@
               <div class="info-note">Note : <strong>{{ room.notes }}</strong></div>
             }
           </div>
-          <button class="btn btn-success" (click)="doMarkAvailable()">
-            ✅ Marquer disponible
-          </button>
+          @if (!readOnly) {
+            <button class="btn btn-success" (click)="doMarkAvailable()">
+              ✅ Marquer disponible
+            </button>
+          }
         }
 
-        <div class="section-label">Actions rapides</div>
-        <div class="action-tabs">
-          <button class="action-tab" (click)="setAction('cleaning')">🧹 Nettoyage</button>
-          <button class="action-tab" (click)="setAction('maintenance')">🔧 Maintenance</button>
-          <button class="action-tab" (click)="setAction('guest')">👤 Client</button>
-        </div>
+        @if (!readOnly) {
+          <div class="section-label">Actions rapides</div>
+          <div class="action-tabs">
+            <button type="button" class="action-tab" (click)="setAction('cleaning')">🧹 Nettoyage</button>
+            <button type="button" class="action-tab" (click)="setAction('maintenance')">🔧 Maintenance</button>
+            <button type="button" class="action-tab" (click)="setAction('guest')">👤 Client</button>
+          </div>
+        }
       }
 
    <!-- FORMULAIRE NETTOYAGE -->
@@ -154,23 +164,25 @@
 
     <!-- ── PIED ── -->
     <div class="modal-footer">
-      @if (action() === null) {
-        <button class="btn btn-ghost" (click)="close.emit()">Fermer</button>
+      @if (readOnly) {
+        <button type="button" class="btn btn-ghost" (click)="close.emit()">Fermer</button>
+      } @else if (action() === null) {
+        <button type="button" class="btn btn-ghost" (click)="close.emit()">Fermer</button>
       } @else {
-        <button class="btn btn-ghost" (click)="setAction(null)">← Retour</button>
+        <button type="button" class="btn btn-ghost" (click)="setAction(null)">← Retour</button>
 
         @if (action() === 'cleaning') {
-          <button class="btn btn-primary" (click)="doAssignCleaning()">
+          <button type="button" class="btn btn-primary" (click)="doAssignCleaning()">
             🧹 Affecter au nettoyage
           </button>
         }
         @if (action() === 'maintenance') {
-          <button class="btn btn-primary" (click)="doAssignMaintenance()">
+          <button type="button" class="btn btn-primary" (click)="doAssignMaintenance()">
             🔧 Affecter à la maintenance
           </button>
         }
         @if (action() === 'guest') {
-          <button class="btn btn-primary" (click)="doAssignGuest()">
+          <button type="button" class="btn btn-primary" (click)="doAssignGuest()">
             🔑 Attribuer la chambre
           </button>
         }

@@ -10,6 +10,8 @@ import { CommonModule } from '@angular/common';
 })
 export class Roomcard {
  @Input({ required: true }) room!: Room;
+  /** Mode consultation : la carte reste cliquable pour afficher les infos sans modifier. */
+  @Input() readOnly = false;
   @Output() cardClick = new EventEmitter<Room>();
  
   get statusLabel(): string {

@@ -1,0 +1,93 @@
+<!-- Navigation invité -->
+<nav class="navbar navbar-public" *ngIf="!currentUser && !hideNavbarOnAuthPages">
+  <div class="navbar-container">
+    <div class="navbar-logo">
+      <a class="logo-link" routerLink="/connexion">
+        <span class="logo-icon">🏨</span>
+        <span class="logo-text">HôtelManager</span>
+      </a>
+    </div>
+    <div class="navbar-menu public-links">
+      <a routerLink="/connexion" class="nav-link nav-link-ghost">Connexion</a>
+      <a routerLink="/inscription" class="nav-link nav-link-primary">Inscription</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Navigation connectée (masquée aussi sur connexion / inscription) -->
+<nav class="navbar" *ngIf="currentUser && !hideNavbarOnAuthPages">
+  <div class="navbar-container">
+    <!-- Logo -->
+    <div class="navbar-logo">
+      <a class="logo-link" (click)="navigateTo('/accueil')">
+        <span class="logo-icon">🏨</span>
+        <span class="logo-text">HôtelManager</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <div class="navbar-menu">
+      <div class="nav-items">
+        <a *ngFor="let item of getVisibleItems()" 
+           (click)="navigateTo(item.path)"
+           class="nav-link"
+           [class.nav-link-no-icon]="!item.icon">
+          <span class="nav-link-icon" *ngIf="item.icon">{{ item.icon }}</span>
+          <span class="nav-link-text">{{ item.label }}</span>
+        </a>
+      </div>
+
+      <!-- User Menu -->
+      <div class="user-menu">
+        <div class="user-info" (click)="toggleDropdown()">
+          <div class="user-avatar">{{ getUserDisplayName().charAt(0).toUpperCase() }}</div>
+          <div class="user-details">
+            <div class="user-name">{{ getUserDisplayName() }}</div>
+            <div class="user-role">{{ getRoleLabel() }}</div>
+          </div>
+          <span class="dropdown-arrow" [class.open]="isDropdownOpen">▼</span>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div class="dropdown-menu" *ngIf="isDropdownOpen">
+          <div class="dropdown-header">
+            {{ getUserDisplayName() }}
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item" (click)="navigateTo('/accueil')">
+            <span class="dropdown-icon">🏠</span>
+            <span>Accueil</span>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item" (click)="logout()">
+            <span class="dropdown-icon">🚪</span>
+            <span>Déconnexion</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-toggle" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen">
+      <span class="hamburger"></span>
+      <span class="hamburger"></span>
+      <span class="hamburger"></span>
+    </button>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" *ngIf="isMobileMenuOpen">
+    <div class="mobile-nav-items">
+      <a *ngFor="let item of getVisibleItems()"
+         (click)="navigateTo(item.path)"
+         class="mobile-nav-link">
+        <span class="nav-link-icon" *ngIf="item.icon">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </div>
+    <div class="mobile-menu-divider"></div>
+    <button class="mobile-logout-btn" (click)="logout()">
+      <span>🚪</span> Déconnexion
+    </button>
+  </div>
+</nav>

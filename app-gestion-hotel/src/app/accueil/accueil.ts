@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReservationService } from '../services/reservation.service';
+import { AuthService } from '../services/auth.service';
 
 export interface ChambreCard {
   id: number;
@@ -21,6 +22,7 @@ export interface Module {
   icon: string;
   label: string;
   route: string;
+  roles: string[];
 }
 
 export interface Stat {
@@ -49,6 +51,7 @@ export class Accueil implements OnInit {
 
   private router = inject(Router);
   private reservationService = inject(ReservationService);
+  private authService = inject(AuthService);
 
   // ── Fourchettes de prix ──
   fourchettes: Record<string, { min: number; max: number }> = {};
@@ -104,11 +107,11 @@ export class Accueil implements OnInit {
 
   // ── Modules de navigation ──
   modules: Module[] = [
-    { icon: '⚙️', label: 'Administration',     route: '/administration' },
-    { icon: '📅', label: 'Réservations',        route: '/dashboard' },
-    { icon: '💬', label: 'Plaintes & Demandes', route: '/plainteetdemande' },
-    { icon: '🎖️', label: 'Cartes fidélité',     route: '/fidelite' },
-    { icon: '💲', label: 'Gestion des tarifs',  route: '/gestion-clients' },
+    { icon: '⚙️', label: 'Administration', route: '/administration', roles: ['ADMIN'] },
+    { icon: '💬', label: 'Plaintes & Demandes', route: '/plainteetdemande', roles: ['CLIENT', 'RECEPTIONNISTE'] },
+    { icon: '🎖️', label: 'Cartes fidélité', route: '/fidelite', roles: ['CLIENT'] },
+    { icon: '💲', label: 'Gestion des clients', route: '/gestion-clients', roles: ['ADMIN', 'RECEPTIONNISTE'] },
+    { icon: '📋', label: 'Affectation', route: '/dashboard', roles: ['PERSONNEL'] },
   ];
 
   // ── Statistiques ──
@@ -173,6 +176,18 @@ export class Accueil implements OnInit {
 
   ngOnInit(): void {
     this.loadFourchettes();
+  }
+
+  getVisibleModules(): Module[] {
+    const role = this.authService.getAppRole(this.authService.getCurrentUser());
+    if (!role) return [];
+    return this.modules.filter((m) => m.roles.includes(role));
+  }
+
+  /** Le personnel ne réserve pas ; client et autres rôles oui. */
+  canBookRooms(): boolean {
+    const role = this.authService.getAppRole(this.authService.getCurrentUser());
+    return role !== 'PERSONNEL';
   }
 
   loadFourchettes(): void {

@@ -79,6 +79,8 @@ public class AuthService {
                         .nom(user.getNom())
                         .prenom(user.getPrenom())
                         .email(user.getEmail())
+                        .telephone(user.getTelephone())
+                        .userType(role)
                         .build())
                 .build();
     }
@@ -102,6 +104,8 @@ public class AuthService {
                         .nom(saved.getNom())
                         .prenom(saved.getPrenom())
                         .email(saved.getEmail())
+                        .telephone(saved.getTelephone())
+                        .userType("CLIENT")
                         .build())
                 .build();
     }

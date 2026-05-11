@@ -13,24 +13,91 @@ import { Inscription } from './inscription/inscription';
 import { ConnectionC } from './connection/connection';
 import { AdminUser } from './admin-user/admin-user';
 import { GestionChambres } from './gestion-chambres/gestion-chambres';
+import { Fidelite } from './fidelite/fidelite';
+import { RoleGuard } from './role-guard';
 
 
 
 export const routes: Routes = [
   { path: '', redirectTo: '/connexion', pathMatch: 'full' },
-  { path: 'connexion', component: ConnectionC  },
+  
+  // Routes PUBLIQUES - Pas de guard
+  { path: 'connexion', component: ConnectionC },
   { path: 'inscription', component: Inscription },
-  { path: 'accueil', component: Accueil },
-  { path: 'reservations', component: Reservation},
-  { path: 'payement', component: Payement },
-  { path: 'administration', component: Administration },
-  { path: 'gestion-clients', component: Gestionclient },
-  { path: 'dashboard', component: Dashboard },
-  { path: 'addchambre', component: Addchambre },
-  { path: 'plainteetdemande', component: Plainte },
-  { path: 'adminUser', component: AdminUser },
-  { path: 'gestion-chambres', component: GestionChambres },
-    { path: 'reservation', component: Reservation },   
+  
+  // Routes PROTÉGÉES - Avec RoleGuard
+  { 
+    path: 'accueil', 
+    component: Accueil,
+    canActivate: [RoleGuard],
+    data: { roles: ['CLIENT', 'PERSONNEL', 'RECEPTIONNISTE', 'ADMIN'] }
+  },
+  { 
+    path: 'reservations', 
+    component: Reservation,
+    canActivate: [RoleGuard],
+    data: { roles: ['CLIENT', 'RECEPTIONNISTE', 'ADMIN'] }
+  },
+  { 
+    path: 'reservation', 
+    component: Reservation,
+    canActivate: [RoleGuard],
+    data: { roles: ['CLIENT', 'RECEPTIONNISTE', 'ADMIN'] }
+  },
+  { 
+    path: 'payement', 
+    component: Payement,
+    canActivate: [RoleGuard],
+    data: { roles: ['RECEPTIONNISTE', 'ADMIN'] }
+  },
+  { 
+    path: 'administration', 
+    component: Administration,
+    canActivate: [RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'gestion-clients', 
+    component: Gestionclient,
+    canActivate: [RoleGuard],
+    data: { roles: ['ADMIN', 'RECEPTIONNISTE'] }
+  },
+  { 
+    path: 'dashboard', 
+    component: Dashboard,
+    canActivate: [RoleGuard],
+    data: { roles: ['ADMIN', 'PERSONNEL','RECEPTIONNISTE'] }
+  },
+  { 
+    path: 'addchambre', 
+    component: Addchambre,
+    canActivate: [RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'plainteetdemande', 
+    component: Plainte,
+    canActivate: [RoleGuard],
+    data: { roles: ['CLIENT', 'RECEPTIONNISTE'] }
+  },
+  { 
+    path: 'adminUser', 
+    component: AdminUser,
+    canActivate: [RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'gestion-chambres', 
+    component: GestionChambres,
+    canActivate: [RoleGuard],
+    data: { roles: ['ADMIN'] }
+  },
+  { 
+    path: 'fidelite', 
+    component: Fidelite,
+    canActivate: [RoleGuard],
+    data: { roles: ['CLIENT'] }
+  },
 ];
 
 

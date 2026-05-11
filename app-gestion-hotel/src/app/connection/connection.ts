@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 @Component({
@@ -55,14 +56,14 @@ export class ConnectionC implements OnInit {
 
     const { email, password } = this.connexionForm.value;
 
-    this.authService.connexion(email, password).subscribe({
+    this.authService.connexion(email, password).pipe(
+      finalize(() => { this.isLoading = false; })
+    ).subscribe({
       next: (response) => {
-        this.isLoading = false;
         console.log('✅ Connexion réussie:', response);
-        this.router.navigate(['/accueil']);
+        void this.router.navigateByUrl('/accueil');
       },
       error: (err) => {
-        this.isLoading = false;
         console.error('❌ Erreur connexion:', err);
         
         if (err.status === 401) {

@@ -38,6 +38,17 @@
   margin-top: 2px;
 }
 
+.read-only-banner {
+  margin-top: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-muted, #64748b);
+  background: rgba(148, 163, 184, 0.12);
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  max-width: 420px;
+}
+
 /* ── FILTRES ── */
 .filters {
   display: flex;
